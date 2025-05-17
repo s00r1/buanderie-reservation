@@ -23,6 +23,12 @@ def reserver():
     end_hour = int(data['heure'].split(':')[0]) + int(data['tournees'])
     end = f"{data['date']}T{str(end_hour).zfill(2)}:00"
 
+    # Vérifie si créneau déjà pris pour la même machine
+    for r in reservations:
+        if r['machine'] == data['machine']:
+            if not (end <= r['start'] or start >= r['end']):
+                return jsonify({"status": "conflict", "message": "Créneau déjà réservé"}), 409
+
     reservations.append({
         "title": f"Chambre {data['chambre']}",
         "start": start,

@@ -87,7 +87,13 @@
                 tournees: document.getElementById("tournees").value,
                 code: document.getElementById("code").value
             })
-        }).then(() => location.reload());
+        }).then(res => {
+        if (res.status === 409) {
+            alert("❌ Ce créneau est déjà réservé pour cette machine.");
+        } else {
+            location.reload();
+        }
+    });
     });
 
     for (let i = 1; i <= 54; i++) {
