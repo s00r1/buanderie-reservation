@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify, render_template
 import json
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 DATA_FILE = "reservations.json"
@@ -23,7 +24,6 @@ def reserver():
     end_hour = int(data['heure'].split(':')[0]) + int(data['tournees'])
     end = f"{data['date']}T{str(end_hour).zfill(2)}:00"
 
-    # Vérifie si créneau déjà pris pour la même machine
     for r in reservations:
         if r['machine'] == data['machine']:
             if not (end <= r['start'] or start >= r['end']):
@@ -60,14 +60,22 @@ def delete_reservation():
     except:
         reservations = []
 
-    start = data.get("start").strip()
+    raw_start = data.get("start")
     code_input = data.get("code").strip()
+
+    # Convertir le start ISO complet en format YYYY-MM-DDTHH:MM
+    try:
+        dt = datetime.fromisoformat(raw_start.replace('Z', '')).replace(second=0, microsecond=0)
+        start = dt.strftime('%Y-%m-%dT%H:%M')
+    except:
+        start = raw_start[:16]  # fallback safe
+
     found = False
     updated_reservations = []
 
     for r in reservations:
-        if r["start"].strip() == start:
-            if r["code"].strip() == code_input or code_input == "s0r1":
+        if r["start"] == start:
+            if r["code"] == code_input or code_input == "s0r1":
                 found = True
                 continue
         updated_reservations.append(r)
