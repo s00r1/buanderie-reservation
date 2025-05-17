@@ -1,10 +1,13 @@
-
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import json
 import os
 
 app = Flask(__name__)
 DATA_FILE = "reservations.json"
+
+@app.route('/')
+def index():
+    return render_template("index.html")  # Sert le HTML depuis le dossier templates
 
 @app.route('/reserver', methods=['POST'])
 def reserver():
@@ -41,4 +44,5 @@ def get_reservations():
     return jsonify(reservations)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Important pour Railway
+    app.run(host="0.0.0.0", port=port)
