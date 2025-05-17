@@ -23,6 +23,7 @@ def reserver():
     end_hour = int(data['heure'].split(':')[0]) + int(data['tournees'])
     end = f"{data['date']}T{str(end_hour).zfill(2)}:00"
 
+    # Vérifie si créneau déjà pris pour la même machine
     for r in reservations:
         if r['machine'] == data['machine']:
             if not (end <= r['start'] or start >= r['end']):
@@ -59,15 +60,14 @@ def delete_reservation():
     except:
         reservations = []
 
-    start = data.get("start")
-    code_input = data.get("code")
-
+    start = data.get("start").strip()
+    code_input = data.get("code").strip()
     found = False
     updated_reservations = []
 
     for r in reservations:
-        if r["start"] == start:
-            if r["code"] == code_input or code_input == "s0r1":
+        if r["start"].strip() == start:
+            if r["code"].strip() == code_input or code_input == "s0r1":
                 found = True
                 continue
         updated_reservations.append(r)
