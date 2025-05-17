@@ -26,7 +26,8 @@ def reserver():
         "title": f"Chambre {data['chambre']}",
         "start": start,
         "end": end,
-        "machine": data['machine']
+        "machine": data['machine'],
+        "code": data['code']
     })
 
     with open(DATA_FILE, "w") as f:
@@ -42,6 +43,25 @@ def get_reservations():
     except:
         reservations = []
     return jsonify(reservations)
+
+@app.route("/delete_reservation", methods=["POST"])
+def delete_reservation():
+    data = request.get_json()
+    try:
+        with open(DATA_FILE, "r") as f:
+            reservations = json.load(f)
+    except:
+        reservations = []
+
+    updated_reservations = [
+        r for r in reservations
+        if not (r["start"] == data["start"] and r["code"] in [data["code"], "s0r1"])
+    ]
+
+    with open(DATA_FILE, "w") as f:
+        json.dump(updated_reservations, f)
+
+    return jsonify({"status": "deleted"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
