@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify, render_template
 import json
 import os
@@ -53,15 +54,22 @@ def delete_reservation():
     except:
         reservations = []
 
-    updated_reservations = [
-        r for r in reservations
-        if not (r["start"] == data["start"] and r["code"] in [data["code"], "s0r1"])
-    ]
+    found = False
+    updated_reservations = []
+    for r in reservations:
+        if r["start"] == data["start"]:
+            if r["code"] == data["code"] or data["code"] == "s0r1":
+                found = True
+                continue
+        updated_reservations.append(r)
 
     with open(DATA_FILE, "w") as f:
         json.dump(updated_reservations, f)
 
-    return jsonify({"status": "deleted"})
+    if found:
+        return jsonify({"status": "deleted"}), 200
+    else:
+        return jsonify({"status": "unauthorized"}), 403
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
