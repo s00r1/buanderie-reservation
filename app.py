@@ -5,15 +5,15 @@ import os
 app = Flask(__name__)
 DATA_FILE = "reservations.json"
 
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template("index.html")  # Sert le HTML depuis le dossier templates
+    return render_template("index.html")
 
-@app.route('/reserver', methods=['POST'])
+@app.route("/reserver", methods=["POST"])
 def reserver():
     data = request.get_json()
     try:
-        with open(DATA_FILE, 'r') as f:
+        with open(DATA_FILE, "r") as f:
             reservations = json.load(f)
     except:
         reservations = []
@@ -29,20 +29,20 @@ def reserver():
         "machine": data['machine']
     })
 
-    with open(DATA_FILE, 'w') as f:
+    with open(DATA_FILE, "w") as f:
         json.dump(reservations, f)
 
     return jsonify({"status": "ok"})
 
-@app.route('/get_reservations', methods=['GET'])
+@app.route("/get_reservations", methods=["GET"])
 def get_reservations():
     try:
-        with open(DATA_FILE, 'r') as f:
+        with open(DATA_FILE, "r") as f:
             reservations = json.load(f)
     except:
         reservations = []
     return jsonify(reservations)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Important pour Railway
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
