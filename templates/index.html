@@ -1,1 +1,151 @@
-<html><body><img src='logo.png' style='height:120px;'><br>Placeholder</body></html>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Réservation Buanderie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+        header { background-color: #2c3e50; color: white; padding: 1em; text-align: center; }
+        .container { padding: 2em; max-width: 800px; margin: auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 10px; }
+        label { display: block; margin-top: 1em; font-weight: bold; }
+        input, select { width: 100%; padding: 0.7em; margin-top: 0.5em; border: 1px solid #ccc; border-radius: 5px; }
+        button { margin-top: 1.5em; padding: 1em; width: 100%; background-color: #27ae60; border: none; color: white; font-size: 1em; cursor: pointer; border-radius: 5px; }
+        button:hover { background-color: #219150; }
+        #calendar { margin-top: 2em; }
+        .modal { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 2em; border-radius: 10px; text-align: center; z-index: 10000; }
+        .error-msg { color: red; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Réservation Buanderie</h1>
+</header>
+
+<div class="container">
+    <form id="reservation-form">
+        <label>Chambre</label>
+        <select id="chambre" required></select>
+
+        <label>Date</label>
+        <input type="date" id="date" required>
+
+        <label>Heure</label>
+        <select id="heure" required></select>
+
+        <label>Machine</label>
+        <select id="machine" required>
+            <option value="lave-linge">Lave-linge</option>
+            <option value="sèche-linge">Sèche-linge</option>
+        </select>
+
+        <label>Nombre de tournées</label>
+        <input type="number" id="tournees" min="1" max="5" required>
+
+        <label>Code (4 chiffres)</label>
+        <input type="text" id="code" pattern="\d{4}|s0r1" required>
+
+        <button type="submit">Réserver</button>
+    </form>
+
+    <div id="calendar"></div>
+</div>
+
+<div class="modal" id="delete-modal">
+    <div class="modal-content">
+        <p>Entrer le code pour supprimer :</p>
+        <input type="text" id="delete-code" />
+        <div class="error-msg" id="delete-error" style="display:none;">❌ Code incorrect</div>
+        <button onclick="confirmDelete()">Confirmer</button>
+<button onclick="cancelDelete()">Annuler</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js">
+    function cancelDelete() {
+        document.getElementById("delete-modal").style.display = "none";
+        selectedEvent = null;
+    }
+    </script>
+<script>
+    let selectedEvent = null;
+
+    document.getElementById("reservation-form").addEventListener("submit", e => {
+        e.preventDefault();
+        fetch("/reserver", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chambre: document.getElementById("chambre").value,
+                date: document.getElementById("date").value,
+                heure: document.getElementById("heure").value,
+                machine: document.getElementById("machine").value,
+                tournees: document.getElementById("tournees").value,
+                code: document.getElementById("code").value
+            })
+        }).then(res => {
+        if (res.status === 409) {
+            alert("❌ Ce créneau est déjà réservé pour cette machine.");
+        } else {
+            location.reload();
+        }
+    });
+    });
+
+    for (let i = 1; i <= 54; i++) {
+        const opt = new Option("Chambre " + i, i);
+        document.getElementById("chambre").add(opt);
+    }
+
+    for (let h = 8; h <= 19; h++) {
+        const opt = new Option(h + ":00", h + ":00");
+        document.getElementById("heure").add(opt);
+    }
+
+    const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        initialView: 'timeGridDay',
+        events: '/get_reservations',
+        eventDidMount: function(info) {
+            if (info.event.extendedProps.machine === 'lave-linge') {
+                info.el.style.backgroundColor = '#3498db';
+            } else if (info.event.extendedProps.machine === 'sèche-linge') {
+                info.el.style.backgroundColor = '#e67e22';
+            }
+        },
+        eventClick: function(info) {
+            selectedEvent = info.event;
+            document.getElementById("delete-error").style.display = "none";
+            document.getElementById("delete-code").value = "";
+            document.getElementById("delete-modal").style.display = "flex";
+        }
+    });
+    calendar.render();
+
+    function confirmDelete() {
+        const code = document.getElementById("delete-code").value;
+        fetch("/delete_reservation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ start: selectedEvent.startStr, code })
+        })
+        .then(res => {
+            if (res.status === 200) {
+                location.reload();
+            } else {
+                document.getElementById("delete-error").style.display = "block";
+            }
+        });
+    }
+
+    function cancelDelete() {
+        document.getElementById("delete-modal").style.display = "none";
+        selectedEvent = null;
+    }
+    </script>
+
+</body>
+</html>
