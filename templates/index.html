@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,27 +6,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
-        header { background-color: #2c3e50; color: white; padding: 1em; text-align: center; }
-        .container { padding: 2em; max-width: 800px; margin: auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 10px; }
-        label { display: block; margin-top: 1em; font-weight: bold; }
-        input, select { width: 100%; padding: 0.7em; margin-top: 0.5em; border: 1px solid #ccc; border-radius: 5px; }
-        button { margin-top: 1.5em; padding: 1em; width: 100%; background-color: #27ae60; border: none; color: white; font-size: 1em; cursor: pointer; border-radius: 5px; }
-        button:hover { background-color: #219150; }
-        #calendar { margin-top: 2em; }
-        .modal { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 2em; border-radius: 10px; text-align: center; z-index: 10000; }
-        .error-msg { color: red; font-weight: bold; margin-top: 10px; }
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            transition: background 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background: #121212;
+            color: #f0f0f0;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1em;
+            text-align: center;
+            position: relative;
+        }
+        .container {
+            padding: 2em;
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        body.dark-mode .container {
+            background: #1e1e1e;
+        }
+        label {
+            display: block;
+            margin-top: 1em;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.7em;
+            margin-top: 0.5em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 1em;
+            padding: 1em;
+            width: 100%;
+            background-color: #27ae60;
+            border: none;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #219150;
+        }
+        #darkToggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 1.5em;
+        }
+        img.logo {
+            height: 300px; /* 3 fois plus grand */
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
-
-    <header>
-        <img src="logo.png" alt="Logo Hôtel" style="height:120px; margin-bottom:10px;">
-        <div id="darkToggle" style="position:absolute; top:10px; right:10px; cursor:pointer; font-size:1.5em;">🌘</div>
-    
-    <h1>Réservation Buanderie</h1>
+<header>
+    <div id="darkToggle">🌘</div>
+    <h1>Hotel Grill</h1> <!-- Texte ajouté au-dessus du logo -->
+    <img src="logo.png" alt="Logo Hôtel" class="logo">
+    <h2>Réservation Buanderie</h2>
 </header>
 
 <div class="container">
@@ -59,24 +112,35 @@
     <div id="calendar"></div>
 </div>
 
-<div class="modal" id="delete-modal">
-    <div class="modal-content">
-        <p>Entrer le code pour supprimer :</p>
-        <input type="text" id="delete-code" />
-        <div class="error-msg" id="delete-error" style="display:none;">❌ Code incorrect</div>
-        <button onclick="confirmDelete()">Confirmer</button>
-<button onclick="cancelDelete()">Annuler</button>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js">
-    function cancelDelete() {
-        document.getElementById("delete-modal").style.display = "none";
-        selectedEvent = null;
-    }
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js"></script>
 <script>
-    let selectedEvent = null;
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("darkToggle").onclick = () => {
+        document.body.classList.toggle("dark-mode");
+        document.getElementById("darkToggle").textContent =
+            document.body.classList.contains("dark-mode") ? "☀️" : "🌘";
+    };
+
+    for (let i = 1; i <= 54; i++) {
+        document.getElementById("chambre").add(new Option("Chambre " + i, i));
+    }
+
+    // Créneaux horaires de 00:00 à 23:00
+    for (let h = 0; h <= 23; h++) {
+        let heure = h.toString().padStart(2, '0') + ":00";
+        document.getElementById("heure").add(new Option(heure, heure));
+    }
+
+    const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        initialView: 'timeGridDay',
+        locale: 'fr',
+        events: '/get_reservations',
+        eventDidMount: function(info) {
+            info.el.style.backgroundColor = (info.event.extendedProps.machine === 'lave-linge') ? '#3498db' : '#e67e22';
+        }
+    });
+    calendar.render();
 
     document.getElementById("reservation-form").addEventListener("submit", e => {
         e.preventDefault();
@@ -92,78 +156,12 @@
                 code: document.getElementById("code").value
             })
         }).then(res => {
-        if (res.status === 409) {
-            alert("❌ Ce créneau est déjà réservé pour cette machine.");
-        } else {
-            location.reload();
-        }
-    });
-    });
-
-    for (let i = 1; i <= 54; i++) {
-        const opt = new Option("Chambre " + i, i);
-        document.getElementById("chambre").add(opt);
-    }
-
-    for (let h = 8; h <= 19; h++) {
-        const opt = new Option(h + ":00", h + ":00");
-        document.getElementById("heure").add(opt);
-    }
-
-    const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'timeGridDay',
-        events: '/get_reservations',
-        eventDidMount: function(info) {
-            if (info.event.extendedProps.machine === 'lave-linge') {
-                info.el.style.backgroundColor = '#3498db';
-            } else if (info.event.extendedProps.machine === 'sèche-linge') {
-                info.el.style.backgroundColor = '#e67e22';
-            }
-        },
-        eventClick: function(info) {
-            selectedEvent = info.event;
-            document.getElementById("delete-error").style.display = "none";
-            document.getElementById("delete-code").value = "";
-            document.getElementById("delete-modal").style.display = "flex";
-        }
-    });
-    calendar.render();
-
-    function confirmDelete() {
-        const code = document.getElementById("delete-code").value;
-        fetch("/delete_reservation", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ start: selectedEvent.startStr, code })
-        })
-        .then(res => {
-            if (res.status === 200) {
-                location.reload();
-            } else {
-                document.getElementById("delete-error").style.display = "block";
-            }
+            if (res.status === 409) alert("❌ Ce créneau est déjà réservé pour cette machine.");
+            else location.reload();
         });
-    }
-
-    function cancelDelete() {
-        document.getElementById("delete-modal").style.display = "none";
-        selectedEvent = null;
-    }
-    </script>
-
-
-<style>
-    body.dark-mode { background: #121212; color: #f0f0f0; }
-    body.dark-mode .container { background: #1e1e1e; }
-</style>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const toggle = document.getElementById("darkToggle");
-        toggle.onclick = () => {
-            document.body.classList.toggle("dark-mode");
-            toggle.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌘";
-        };
     });
+});
 </script>
+
 </body>
 </html>
