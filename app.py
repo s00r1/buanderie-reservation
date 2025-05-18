@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify, render_template
 import json
 import os
@@ -63,12 +62,11 @@ def delete_reservation():
     raw_start = data.get("start")
     code_input = data.get("code").strip()
 
-    # Convertir le start ISO complet en format YYYY-MM-DDTHH:MM
     try:
         dt = datetime.fromisoformat(raw_start.replace('Z', '')).replace(second=0, microsecond=0)
         start = dt.strftime('%Y-%m-%dT%H:%M')
     except:
-        start = raw_start[:16]  # fallback safe
+        start = raw_start[:16]
 
     found = False
     updated_reservations = []
