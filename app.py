@@ -1,5 +1,4 @@
-
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import json
 import os
 from datetime import datetime
@@ -10,6 +9,10 @@ DATA_FILE = "reservations.json"
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/<path:filename>")
+def static_files(filename):
+    return send_from_directory("templates", filename)
 
 @app.route("/reserver", methods=["POST"])
 def reserver():
@@ -63,12 +66,11 @@ def delete_reservation():
     raw_start = data.get("start")
     code_input = data.get("code").strip()
 
-    # Convertir le start ISO complet en format YYYY-MM-DDTHH:MM
     try:
         dt = datetime.fromisoformat(raw_start.replace('Z', '')).replace(second=0, microsecond=0)
         start = dt.strftime('%Y-%m-%dT%H:%M')
     except:
-        start = raw_start[:16]  # fallback safe
+        start = raw_start[:16]
 
     found = False
     updated_reservations = []
@@ -91,3 +93,7 @@ def delete_reservation():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
+@app.route("/logo.gif")
+def serve_logo():
+    return send_from_directory("templates", "logo.gif")
