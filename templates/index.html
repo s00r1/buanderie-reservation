@@ -173,20 +173,26 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("reservation-form").addEventListener("submit", e => {
         e.preventDefault();
         fetch("/reserver", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                chambre: document.getElementById("chambre").value,
-                date: document.getElementById("date").value,
-                heure: document.getElementById("heure").value,
-                machine: document.getElementById("machine").value,
-                tournees: document.getElementById("tournees").value,
-                code: document.getElementById("code").value
-            })
-        }).then(res => {
-            if (res.status === 409) alert("❌ Ce créneau est déjà réservé pour cette machine.");
-            else res.json().then(data => alert(data.message || '❌ Erreur lors de la réservation.'));
-        });
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        chambre: document.getElementById("chambre").value,
+        date: document.getElementById("date").value,
+        heure: document.getElementById("heure").value,
+        machine: document.getElementById("machine").value,
+        tournees: document.getElementById("tournees").value,
+        code: document.getElementById("code").value
+    })
+}).then(async res => {
+    const data = await res.json();
+    if (res.ok) {
+        location.reload();
+    } else {
+        alert(data.message || "❌ Erreur lors de la réservation.");
+    }
+}).catch(err => {
+    alert("❌ Erreur de connexion au serveur.");
+});
     });
 });
 </script>
