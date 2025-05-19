@@ -158,7 +158,21 @@ document.addEventListener("DOMContentLoaded", () => {
         slotMinTime: '07:00:00',
         slotMaxTime: '23:00:00',
         events: '/get_reservations',
+        
         eventDidMount: function(info) {
+            const now = new Date();
+            const eventEnd = new Date(info.event.end);
+            if (eventEnd < now) {
+                info.el.style.opacity = "0.5";
+                info.el.style.backgroundColor = "#888";
+                info.el.style.borderColor = "#666";
+            } else if (info.event.extendedProps.machine === 'lave-linge') {
+                info.el.style.backgroundColor = '#3498db';
+            } else if (info.event.extendedProps.machine === 'sèche-linge') {
+                info.el.style.backgroundColor = '#e67e22';
+            }
+        },
+    
             info.el.style.backgroundColor = (info.event.extendedProps.machine === 'lave-linge') ? '#3498db' : '#e67e22';
         }
     });
