@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Créneaux horaires de 00:00 à 23:00
-    for (let h = 0; h <= 23; h++) {
+    for (let h = 7; h <= 22; h++) {
         let heure = h.toString().padStart(2, '0') + ":00";
         document.getElementById("heure").add(new Option(heure, heure));
     }
@@ -139,6 +139,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialView: 'timeGridDay',
         locale: 'fr',
+        slotMinTime: '07:00:00',
+        slotMaxTime: '23:00:00',
         events: '/get_reservations',
         eventDidMount: function(info) {
             info.el.style.backgroundColor = (info.event.extendedProps.machine === 'lave-linge') ? '#3498db' : '#e67e22';
