@@ -24,12 +24,7 @@ def reserver():
         reservations = []
 
     start = f"{data['date']}T{data['heure']}"
-    now = datetime.now().strftime("%Y-%m-%dT%H:%M")
-    if start < now:
-        return jsonify({"status": "error", "message": "❌ Impossible de réserver dans le passé."}), 400
     end_hour = int(data['heure'].split(':')[0]) + int(data['tournees'])
-    if end_hour > 23:
-        return jsonify({"status": "error", "message": "❌ La buanderie ferme à 23h00. Veuillez choisir un créneau plus tôt."}), 400
     end = f"{data['date']}T{str(end_hour).zfill(2)}:00"
 
     for r in reservations:
