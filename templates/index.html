@@ -71,7 +71,7 @@
             font-size: 1.5em;
         }
         img.logo {
-            height: 300px;
+            height: 200px;
             margin-bottom: 10px;
         }
         #calendar {
@@ -177,10 +177,26 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("chambre").add(new Option("Chambre " + i, i));
     }
 
-    for (let h = 7; h <= 22; h++) {
-        const heure = h.toString().padStart(2, '0') + ":00";
-        document.getElementById("heure").add(new Option(heure, heure));
+    
+    const heureSelect = document.getElementById("heure");
+    function updateHeureOptions() {
+        const dateInput = document.getElementById("date").value;
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        heureSelect.innerHTML = "";
+        for (let h = 7; h <= 22; h++) {
+            const heureStr = h.toString().padStart(2, '0') + ":00";
+            if (dateInput > todayStr || (dateInput === todayStr && h > now.getHours())) {
+                const opt = document.createElement("option");
+                opt.value = heureStr;
+                opt.text = heureStr;
+                heureSelect.appendChild(opt);
+            }
+        }
     }
+    document.getElementById("date").addEventListener("change", updateHeureOptions);
+    updateHeureOptions();
+
 
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialView: 'timeGridDay',
