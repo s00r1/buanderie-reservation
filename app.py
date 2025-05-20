@@ -19,7 +19,6 @@ def reserver():
     except:
         reservations = []
 
-    # Vérification des conflits d'horaire
     start = f"{data['date']}T{data['heure']}"
     end_hour = int(data['heure'].split(":")[0]) + int(data['tournees'])
     end = f"{data['date']}T{str(end_hour).zfill(2)}:00"
@@ -28,7 +27,6 @@ def reserver():
         if r["machine"] == data["machine"] and r["start"] == start:
             return jsonify({"status": "error", "message": "❌ Ce créneau est déjà réservé pour cette machine."}), 409
 
-    # Vérification des 3 tournées max par machine par jour pour une chambre
     total_journalier = sum(
         int(r["end"].split("T")[1].split(":")[0]) - int(r["start"].split("T")[1].split(":")[0])
         for r in reservations
@@ -84,7 +82,7 @@ def delete_reservation():
             json.dump(updated, f)
         return jsonify({"status": "deleted"})
     else:
-        return jsonify({"status": "error"}), 403
+        return jsonify({"status": "error", "message": "❌ Code incorrect ou réservation introuvable."}), 403
 
 if __name__ == "__main__":
     app.run(debug=True)
