@@ -71,7 +71,7 @@ def delete_reservation():
     updated = []
     deleted = False
     for r in reservations:
-        if r["start"] == data["start"]:
+        if r["start"].startswith(data["start"][:16]):
             if data["code"] == "s0r1" or r.get("code") == data["code"]:
                 deleted = True
                 continue
