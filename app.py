@@ -1,14 +1,18 @@
-
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import json
 import os
+from datetime import datetime
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__)
 DATA_FILE = "reservations.json"
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/<path:filename>")
+def static_files(filename):
+    return send_from_directory("templates", filename)
 
 @app.route("/reserver", methods=["POST"])
 def reserver():
@@ -19,32 +23,21 @@ def reserver():
     except:
         reservations = []
 
-    # Vérification des conflits d'horaire
     start = f"{data['date']}T{data['heure']}"
-    end_hour = int(data['heure'].split(":")[0]) + int(data['tournees'])
+    end_hour = int(data['heure'].split(':')[0]) + int(data['tournees'])
     end = f"{data['date']}T{str(end_hour).zfill(2)}:00"
 
     for r in reservations:
-        if r["machine"] == data["machine"] and r["start"] == start:
-            return jsonify({"status": "error", "message": "❌ Ce créneau est déjà réservé pour cette machine."}), 409
-
-    # Vérification des 3 tournées max par machine par jour pour une chambre
-    total_journalier = sum(
-        int(r["end"].split("T")[1].split(":")[0]) - int(r["start"].split("T")[1].split(":")[0])
-        for r in reservations
-        if r["machine"] == data["machine"]
-        and r["title"] == f"Chambre {data['chambre']}"
-        and r["start"].startswith(data["date"])
-    )
-    if total_journalier + int(data["tournees"]) > 3:
-        return jsonify({"status": "error", "message": "❌ Maximum 3 tournées par machine et par jour autorisées."}), 400
+        if r['machine'] == data['machine']:
+            if not (end <= r['start'] or start >= r['end']):
+                return jsonify({"status": "conflict", "message": "Créneau déjà réservé"}), 409
 
     reservations.append({
         "title": f"Chambre {data['chambre']}",
         "start": start,
         "end": end,
-        "machine": data["machine"],
-        "code": data["code"]
+        "machine": data['machine'],
+        "code": data['code']
     })
 
     with open(DATA_FILE, "w") as f:
@@ -70,21 +63,33 @@ def delete_reservation():
     except:
         reservations = []
 
-    updated = []
-    deleted = False
-    for r in reservations:
-        if r["start"] == data["start"]:
-            if r.get("code") == data["code"] or data["code"] == "s0r1":
-                deleted = True
-                continue
-        updated.append(r)
+    raw_start = data.get("start")
+    code_input = data.get("code").strip()
 
-    if deleted:
-        with open(DATA_FILE, "w") as f:
-            json.dump(updated, f)
-        return jsonify({"status": "deleted"})
+    try:
+        dt = datetime.fromisoformat(raw_start.replace('Z', '')).replace(second=0, microsecond=0)
+        start = dt.strftime('%Y-%m-%dT%H:%M')
+    except:
+        start = raw_start[:16]
+
+    found = False
+    updated_reservations = []
+
+    for r in reservations:
+        if r["start"] == start:
+            if r["code"] == code_input or code_input == "s0r1":
+                found = True
+                continue
+        updated_reservations.append(r)
+
+    with open(DATA_FILE, "w") as f:
+        json.dump(updated_reservations, f)
+
+    if found:
+        return jsonify({"status": "deleted"}), 200
     else:
-        return jsonify({"status": "error"}), 403
+        return jsonify({"status": "unauthorized"}), 403
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
