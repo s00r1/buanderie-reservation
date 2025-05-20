@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify, render_template
 import json
 import os
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__, template_folder="templates", static_folder="static")
 DATA_FILE = "reservations.json"
 
 @app.route("/")
