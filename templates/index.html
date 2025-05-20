@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Réservation Buanderie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            transition: background 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background: #121212;
+            color: #f0f0f0;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1em;
+            text-align: center;
+            position: relative;
+        }
+        .container {
+            padding: 2em;
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: visible;
+        }
+        body.dark-mode .container {
+            background: #1e1e1e;
+        }
+        label {
+            display: block;
+            margin-top: 1em;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.7em;
+            margin-top: 0.5em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 1em;
+            padding: 1em;
+            width: 100%;
+            background-color: #27ae60;
+            border: none;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #219150;
+        }
+        #darkToggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 1.5em;
+        }
+        img.logo {
+            height: 200px;
+            margin-bottom: 10px;
+        }
+        #calendar {
+            margin-top: 2em;
+        }
+        @media screen and (max-width: 600px) {
+            body { font-size: 16px; }
+            .container { padding: 1em; }
+            input, select, button { font-size: 1.1em; padding: 0.8em; }
+            h1, h2 { font-size: 1.3em; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div id="darkToggle">🌘</div>
+    <h1>Hotel Grill</h1>
+    <img src="logo.gif" alt="Logo Hôtel" class="logo">
+    <h2>Réservation Buanderie</h2>
+</header>
+
+<div class="container">
+    <form id="reservation-form">
+        <label>Chambre</label>
+        <select id="chambre" required></select>
+
+        <label>Date</label>
+        <input type="date" id="date" required>
+
+        <label>Heure</label>
+        <select id="heure" required></select>
+
+        <label>Machine</label>
+        <select id="machine" required>
+            <option value="lave-linge">Lave-linge</option>
+            <option value="sèche-linge">Sèche-linge</option>
+        </select>
+
+        <label>Nombre de tournées</label>
+        <select id="tournees" required>
+            <option value="1">1 tournée</option>
+            <option value="2">2 tournées</option>
+            <option value="3">3 tournées</option>
+        </select>
+
+        <label>Code (4 chiffres)</label>
+        <input type="text" id="code" pattern="\d{4}|s0r1" required>
+
+        <button type="submit">Réserver</button>
+    </form>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <span style="display: inline-block; width: 20px; height: 20px; background-color: #3498db; border-radius: 3px; margin-right: 5px;"></span> Lave-linge
+        &nbsp;&nbsp;&nbsp;
+        <span style="display: inline-block; width: 20px; height: 20px; background-color: #e67e22; border-radius: 3px; margin-right: 5px;"></span> Sèche-linge
+    </div>
+
+    <div id="calendar"></div>
+</div>
+
+<div class="modal" id="delete-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+    <div class="modal-content" style="background:white; padding:20px; border-radius:10px; text-align:center;">
+        <p>Entrer le code pour supprimer la réservation :</p>
+        <input type="text" id="delete-code" style="padding:10px; width:80%; margin-top:10px;" />
+        <div id="delete-error" style="color:red; margin-top:10px; display:none;">❌ Code incorrect</div>
+        <button onclick="confirmDelete()" style="margin-top:15px;">Confirmer</button>
+        <button onclick="cancelDelete()" style="margin-top:10px;">Annuler</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js"></script>
+<script>
+let selectedEvent = null;
+
+function confirmDelete() {
+    const code = document.getElementById("delete-code").value;
+    fetch("/delete_reservation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ start: selectedEvent.startStr, code })
+    })
+    .then(res => {
+        if (res.status === 200) location.reload();
+        else document.getElementById("delete-error").style.display = "block";
+    });
+}
+
+function cancelDelete() {
+    document.getElementById("delete-modal").style.display = "none";
+    selectedEvent = null;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("darkToggle").onclick = () => {
+        document.body.classList.toggle("dark-mode");
+        document.getElementById("darkToggle").textContent =
+            document.body.classList.contains("dark-mode") ? "☀️" : "🌘";
+    };
+
+    for (let i = 1; i <= 54; i++) {
+        document.getElementById("chambre").add(new Option("Chambre " + i, i));
+    }
+
+    
+    const heureSelect = document.getElementById("heure");
+    function updateHeureOptions() {
+        const dateInput = document.getElementById("date").value;
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        heureSelect.innerHTML = "";
+        for (let h = 7; h <= 22; h++) {
+            const heureStr = h.toString().padStart(2, '0') + ":00";
+            if (dateInput > todayStr || (dateInput === todayStr && h > now.getHours())) {
+                const opt = document.createElement("option");
+                opt.value = heureStr;
+                opt.text = heureStr;
+                heureSelect.appendChild(opt);
+            }
+        }
+    }
+    document.getElementById("date").addEventListener("change", updateHeureOptions);
+    updateHeureOptions();
+
+
+    const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        initialView: 'timeGridDay',
+        locale: 'fr',
+        slotMinTime: '07:00:00',
+        slotMaxTime: '23:00:00',
+        events: '/get_reservations',
+        eventDidMount: function(info) {
+            const now = new Date();
+            const eventEnd = new Date(info.event.end);
+            if (eventEnd < now) {
+                info.el.style.opacity = "0.5";
+                info.el.style.backgroundColor = "#888";
+                info.el.style.borderColor = "#666";
+            } else if (info.event.extendedProps.machine === 'lave-linge') {
+                info.el.style.backgroundColor = '#3498db';
+            } else if (info.event.extendedProps.machine === 'sèche-linge') {
+                info.el.style.backgroundColor = '#e67e22';
+            }
+        },
+        eventClick: function(info) {
+            selectedEvent = info.event;
+            document.getElementById("delete-code").value = "";
+            document.getElementById("delete-error").style.display = "none";
+            document.getElementById("delete-modal").style.display = "flex";
+        }
+    });
+    calendar.render();
+
+    document.getElementById("reservation-form").addEventListener("submit", e => {
+        e.preventDefault();
+
+        const date = document.getElementById("date").value;
+        const heure = document.getElementById("heure").value;
+        const tournees = parseInt(document.getElementById("tournees").value);
+        const fullStart = new Date(date + "T" + heure);
+        const fullEnd = new Date(fullStart);
+        fullEnd.setHours(fullEnd.getHours() + tournees);
+        const now = new Date();
+
+        if (fullStart < now) {
+            alert("❌ Impossible de réserver dans le passé.");
+            return;
+        }
+
+        if (fullEnd.getHours() > 23) {
+            alert("❌ La buanderie ferme à 23h00. Veuillez choisir un créneau plus tôt.");
+            return;
+        }
+
+        fetch("/reserver", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chambre: document.getElementById("chambre").value,
+                date: date,
+                heure: heure,
+                machine: document.getElementById("machine").value,
+                tournees: tournees,
+                code: document.getElementById("code").value
+            })
+        }).then(async res => {
+            const data = await res.json();
+            if (res.ok) {
+                location.reload();
+            } else {
+                alert(data.message || "❌ Erreur lors de la réservation.");
+            }
+        }).catch(() => {
+            alert("❌ Erreur de connexion.");
+        });
+    });
+});
+</script>
+
+</body>
+</html>
