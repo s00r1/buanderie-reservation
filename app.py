@@ -76,7 +76,8 @@ def reserver():
         "start": start,
         "end": end,
         "machine": data["machine"],
-        "code": data["code"]
+        "code": data["code"],
+        "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
     }
     reservations.append(reservation_record)
 
@@ -93,7 +94,8 @@ def reserver():
             "end": end,
             "machine": data["machine"],
             "code": data["code"],
-            "id": new_id
+            "id": new_id,
+            "created": reservation_record["created"],
         }
     }
 
@@ -138,18 +140,26 @@ def receipt(res_id: int):
     if res_id < 0 or res_id >= len(reservations):
         return "Reservation not found", 404
     r = reservations[res_id]
+    created_str = r.get("created")
+    created_dt = datetime.fromisoformat(created_str) if created_str else None
     if request.args.get("pdf") == "1":
-        pdf = FPDF(format="A6")
+        pdf = FPDF(unit="mm", format=(80, 120))
         pdf.add_page()
-        pdf.set_font("Arial", "B", 16)
-        pdf.cell(0, 10, "Reçu de réservation", ln=True, align="C")
-        pdf.set_font("Arial", "", 12)
-        pdf.cell(0, 8, r["title"], ln=True)
-        pdf.cell(0, 8, f"Machine: {r['machine']}", ln=True)
-        pdf.cell(0, 8, f"Début: {r['start'].replace('T', ' ')}", ln=True)
-        pdf.cell(0, 8, f"Fin: {r['end'].replace('T', ' ')}", ln=True)
+        pdf.set_font("Arial", "B", 14)
+        pdf.cell(0, 8, "Reçu de réservation", ln=True, align="C")
+        pdf.ln(2)
+        pdf.set_font("Arial", "", 11)
+        pdf.cell(0, 6, r["title"], ln=True)
+        pdf.cell(0, 6, f"Machine : {r['machine']}", ln=True)
+        pdf.cell(0, 6, f"Début : {r['start'].replace('T', ' ')}", ln=True)
+        pdf.cell(0, 6, f"Fin : {r['end'].replace('T', ' ')}", ln=True)
+        pdf.ln(4)
         pdf.set_font("Arial", "I", 8)
-        pdf.cell(0, 8, f"Hotel Grill - {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=True, align="C")
+        if created_dt:
+            footer_text = f"Hotel Grill - réservation effectuée le {created_dt.strftime('%Y-%m-%d %H:%M')}"
+        else:
+            footer_text = "Hotel Grill"
+        pdf.cell(0, 5, footer_text, ln=True, align="C")
         response = make_response(pdf.output(dest="S").encode("latin-1"))
         response.headers["Content-Type"] = "application/pdf"
         response.headers["Content-Disposition"] = "attachment; filename=receipt.pdf"
@@ -160,6 +170,7 @@ def receipt(res_id: int):
         reservation=r,
         hotel_name="Hotel Grill",
         generated=datetime.now(),
+        created=created_dt,
     )
 
 if __name__ == "__main__":

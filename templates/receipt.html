@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>Reçu</title>
     <style>
-        body { width: 10.5cm; margin: 0 auto; font-family: Arial, sans-serif; }
+        body { width: 8cm; margin: 0 auto; font-family: Arial, sans-serif; }
         h1 { font-size: 1.2em; text-align: center; margin-bottom: 10px; }
-        .details { font-size: 0.9em; margin: 4px 0; }
+        .details { font-size: 0.9em; margin: 3px 0; }
         footer { font-size: 0.7em; font-style: italic; text-align: center; margin-top: 15px; }
     </style>
 </head>
@@ -16,6 +16,10 @@
     <div class="details">Machine : {{ reservation.machine }}</div>
     <div class="details">Début : {{ reservation.start.replace('T', ' ') }}</div>
     <div class="details">Fin : {{ reservation.end.replace('T', ' ') }}</div>
-    <footer>{{ hotel_name }} - généré le {{ generated.strftime('%Y-%m-%d %H:%M') }}</footer>
+    {% if created %}
+    <footer>{{ hotel_name }} - réservation effectuée le {{ created.strftime('%Y-%m-%d %H:%M') }}</footer>
+    {% else %}
+    <footer>{{ hotel_name }}</footer>
+    {% endif %}
 </body>
 </html>

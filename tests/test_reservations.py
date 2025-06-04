@@ -162,3 +162,4 @@ def test_receipt_route(client):
     text = receipt.get_data(as_text=True)
     assert "lave-linge" in text
     assert "Chambre 4" in text
+    assert "réservation effectuée" in text
