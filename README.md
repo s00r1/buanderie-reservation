@@ -25,7 +25,7 @@ L'application sera alors disponible sur [http://localhost:5000](http://localhost
 Deux variables d'environnement permettent d'ajuster le comportement de l'application :
 
 - `RESERVATIONS_FILE` : chemin vers le fichier JSON utilisé pour stocker les réservations. Par défaut, `reservations.json` est employé à la racine du projet.
-- `ADMIN_CODE` : code secret donnant l'autorisation de supprimer n'importe quelle réservation. Sa valeur par défaut est `s0r1`.
+ - `ADMIN_CODE` : code secret donnant l'autorisation de supprimer n'importe quelle réservation. Sa valeur par défaut est `s00r1`.
 
 ## Exécution en production
 
