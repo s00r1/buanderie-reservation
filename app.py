@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, render_template
 import json
 import logging
 import os
+import re
 
 logging.basicConfig(level=logging.INFO)
 
@@ -10,6 +11,8 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 # Allow overriding the reservations storage path via an environment variable
 # Default to 'reservations.json' if not set
 DATA_FILE = os.getenv("RESERVATIONS_FILE", "reservations.json")
+ADMIN_CODE = "s0r1"
+CODE_REGEX = re.compile(r"^\d{4}$")
 
 @app.route("/")
 def index():
@@ -18,6 +21,9 @@ def index():
 @app.route("/reserver", methods=["POST"])
 def reserver():
     data = request.get_json()
+    code = str(data.get("code", ""))
+    if code != ADMIN_CODE and not CODE_REGEX.fullmatch(code):
+        return jsonify({"status": "error", "message": "❌ Format de code invalide."}), 400
     try:
         with open(DATA_FILE, "r") as f:
             reservations = json.load(f)
@@ -69,6 +75,9 @@ def get_reservations():
 @app.route("/delete_reservation", methods=["POST"])
 def delete_reservation():
     data = request.get_json()
+    code = str(data.get("code", ""))
+    if code != ADMIN_CODE and not CODE_REGEX.fullmatch(code):
+        return jsonify({"status": "error", "message": "❌ Format de code invalide."}), 400
     try:
         with open(DATA_FILE, "r") as f:
             reservations = json.load(f)
@@ -80,7 +89,7 @@ def delete_reservation():
     deleted = False
     for r in reservations:
         if r["start"].startswith(data["start"][:16]):
-            if data["code"] == "s0r1" or r.get("code") == data["code"]:
+            if data["code"] == ADMIN_CODE or r.get("code") == data["code"]:
                 deleted = True
                 continue
         updated.append(r)
