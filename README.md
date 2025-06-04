@@ -20,20 +20,22 @@ python app.py
 
 L'application sera alors disponible sur [http://localhost:5000](http://localhost:5000).
 
-## Configuration
+## Variables de configuration
 
-Le chemin du fichier stockant les réservations peut être personnalisé via la variable d'environnement `RESERVATIONS_FILE`.
-Si elle n'est pas définie, l'application utilisera `reservations.json` par défaut.
+Deux variables d'environnement permettent d'ajuster le comportement de l'application :
 
-La valeur du code administrateur peut également être ajustée grâce à la variable d'environnement `ADMIN_CODE`. Elle vaut `s0r1` si elle n'est pas spécifiée.
+- `RESERVATIONS_FILE` : chemin vers le fichier JSON utilisé pour stocker les réservations. Par défaut, `reservations.json` est employé à la racine du projet.
+- `ADMIN_CODE` : code secret donnant l'autorisation de supprimer n'importe quelle réservation. Sa valeur par défaut est `s0r1`.
 
-## Déploiement
+## Exécution en production
 
-Pour déployer sur une plateforme compatible avec les fichiers `Procfile` (comme Heroku), renommez `Procfile.txt` en `Procfile` si nécessaire puis poussez le dépôt. Le contenu du `Procfile` indique à la plateforme de démarrer l'application avec :
+Pour un environnement de production, il est recommandé d'utiliser Gunicorn :
 
-```procfile
-web: gunicorn app:app
+```bash
+gunicorn app:app
 ```
+
+Le `Procfile` fourni contient cette commande afin de faciliter le déploiement sur des plateformes comme Heroku.
 
 ## Tests
 
@@ -42,5 +44,9 @@ Une suite de tests unitaires est fournie pour vérifier les principales routes d
 ```bash
 pytest
 ```
+
+## Contribuer
+
+Les contributions sont les bienvenues ! Ouvrez une issue pour discuter d'un changement ou proposez directement une pull request. Veillez à faire tourner `pytest` avant toute soumission.
 
 
