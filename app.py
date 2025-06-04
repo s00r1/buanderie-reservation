@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+from datetime import datetime
 from filelock import FileLock
 
 logging.basicConfig(level=logging.INFO)
@@ -48,8 +49,15 @@ def reserver():
     end_hour = int(data['heure'].split(":")[0]) + int(data['tournees'])
     end = f"{data['date']}T{str(end_hour).zfill(2)}:00"
 
+    new_start = datetime.fromisoformat(start)
+    new_end = datetime.fromisoformat(end)
+
     for r in reservations:
-        if r["machine"] == data["machine"] and r["start"] == start:
+        if r["machine"] != data["machine"]:
+            continue
+        existing_start = datetime.fromisoformat(r["start"])
+        existing_end = datetime.fromisoformat(r["end"])
+        if new_start < existing_end and new_end > existing_start:
             return jsonify({"status": "error", "message": "❌ Ce créneau est déjà réservé pour cette machine."}), 409
 
     total_journalier = sum(
