@@ -2,7 +2,6 @@
 from flask import Flask, request, jsonify, render_template
 import json
 import logging
-import os
 
 logging.basicConfig(level=logging.INFO)
 
