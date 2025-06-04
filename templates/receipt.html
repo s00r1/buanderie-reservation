@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Reçu</title>
+    <style>
+        body { width: 10.5cm; margin: 0 auto; font-family: Arial, sans-serif; }
+        h1 { font-size: 1.2em; text-align: center; margin-bottom: 10px; }
+        .details { font-size: 0.9em; margin: 4px 0; }
+        footer { font-size: 0.7em; font-style: italic; text-align: center; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Reçu de réservation</h1>
+    <div class="details">{{ reservation.title }}</div>
+    <div class="details">Machine : {{ reservation.machine }}</div>
+    <div class="details">Début : {{ reservation.start.replace('T', ' ') }}</div>
+    <div class="details">Fin : {{ reservation.end.replace('T', ' ') }}</div>
+    <footer>{{ hotel_name }} - généré le {{ generated.strftime('%Y-%m-%d %H:%M') }}</footer>
+</body>
+</html>

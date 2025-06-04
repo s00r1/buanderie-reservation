@@ -143,3 +143,22 @@ def test_get_reservations_hides_code(client):
     assert isinstance(data, list)
     assert data
     assert "code" not in data[0]
+
+
+def test_receipt_route(client):
+    payload = {
+        "code": "1234",
+        "date": "2025-01-05",
+        "heure": "10:00",
+        "tournees": 1,
+        "machine": "lave-linge",
+        "chambre": "4",
+    }
+    resp = client.post("/reserver", json=payload)
+    assert resp.status_code == 200
+    res_id = resp.get_json()["reservation"]["id"]
+    receipt = client.get(f"/receipt/{res_id}")
+    assert receipt.status_code == 200
+    text = receipt.get_data(as_text=True)
+    assert "lave-linge" in text
+    assert "Chambre 4" in text
