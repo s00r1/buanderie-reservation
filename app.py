@@ -11,7 +11,7 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 # Allow overriding the reservations storage path via an environment variable
 # Default to 'reservations.json' if not set
 DATA_FILE = os.getenv("RESERVATIONS_FILE", "reservations.json")
-ADMIN_CODE = "s0r1"
+ADMIN_CODE = os.getenv("ADMIN_CODE", "s0r1")
 CODE_REGEX = re.compile(r"^\d{4}$")
 
 @app.route("/")
