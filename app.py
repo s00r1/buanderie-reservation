@@ -139,7 +139,9 @@ def receipt(res_id: int):
         return "Reservation not found", 404
     r = reservations[res_id]
     if request.args.get("pdf") == "1":
-        pdf = FPDF(format="A6")
+        # FPDF only supports a limited set of page names (A3, A4, A5, letter, legal)
+        # so we specify custom dimensions for an A6-like format (105x148 mm)
+        pdf = FPDF(unit="mm", format=(105, 148))
         pdf.add_page()
         pdf.set_font("Arial", "B", 16)
         pdf.cell(0, 10, "Reçu de réservation", ln=True, align="C")
