@@ -22,10 +22,10 @@ L'application sera alors disponible sur [http://localhost:5000](http://localhost
 
 ## Déploiement
 
-Pour déployer sur une plateforme compatible avec les fichiers `Procfile` (comme Heroku), renommez `Procfile.txt` en `Procfile` si nécessaire puis poussez le dépôt. Le contenu du `Procfile` indique à la plateforme de démarrer l'application avec :
+Pour déployer sur une plateforme compatible avec les fichiers `Procfile` (comme Heroku), renommez `Procfile.txt` en `Procfile` si nécessaire puis poussez le dépôt. Le contenu du `Procfile` indique à la plateforme de démarrer l'application avec :
 
 ```procfile
-web: python app.py
+web: gunicorn app:app
 ```
 
 
