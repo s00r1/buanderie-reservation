@@ -2,11 +2,14 @@
 from flask import Flask, request, jsonify, render_template
 import json
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-DATA_FILE = "reservations.json"
+# Allow overriding the reservations storage path via an environment variable
+# Default to 'reservations.json' if not set
+DATA_FILE = os.getenv("RESERVATIONS_FILE", "reservations.json")
 
 @app.route("/")
 def index():
