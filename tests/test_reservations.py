@@ -35,7 +35,10 @@ def test_successful_reservation(client):
     }
     response = client.post("/reserver", json=payload)
     assert response.status_code == 200
-    assert response.get_json()["status"] == "ok"
+    data = response.get_json()
+    assert data["status"] == "ok"
+    assert data["reservation"]["start"] == "2025-01-01T08:00"
+    assert data["reservation"]["end"] == "2025-01-01T09:00"
     reservations = load_reservations()
     assert len(reservations) == 1
     assert reservations[0]["start"] == "2025-01-01T08:00"
