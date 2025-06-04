@@ -35,4 +35,12 @@ Pour déployer sur une plateforme compatible avec les fichiers `Procfile` (comme
 web: gunicorn app:app
 ```
 
+## Tests
+
+Une suite de tests unitaires est fournie pour vérifier les principales routes de l'application. Après installation des dépendances, lancez simplement :
+
+```bash
+pytest
+```
+
 
