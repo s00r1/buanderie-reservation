@@ -163,3 +163,4 @@ def test_receipt_route(client):
     assert "lave-linge" in text
     assert "Chambre 4" in text
     assert "réservation effectuée" in text
+    assert "1234" in text
