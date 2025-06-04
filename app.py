@@ -1,7 +1,10 @@
 
 from flask import Flask, request, jsonify, render_template
 import json
+import logging
 import os
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 DATA_FILE = "reservations.json"
@@ -16,7 +19,8 @@ def reserver():
     try:
         with open(DATA_FILE, "r") as f:
             reservations = json.load(f)
-    except:
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logging.warning("Could not load reservations: %s", e)
         reservations = []
 
     start = f"{data['date']}T{data['heure']}"
@@ -55,7 +59,8 @@ def get_reservations():
     try:
         with open(DATA_FILE, "r") as f:
             reservations = json.load(f)
-    except:
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logging.warning("Could not load reservations: %s", e)
         reservations = []
     return jsonify(reservations)
 
@@ -65,7 +70,8 @@ def delete_reservation():
     try:
         with open(DATA_FILE, "r") as f:
             reservations = json.load(f)
-    except:
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logging.warning("Could not load reservations: %s", e)
         reservations = []
 
     updated = []
