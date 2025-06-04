@@ -6,12 +6,16 @@
     <title>Réservation Buanderie</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: sans-serif;
+            font-family: "Roboto", Arial, sans-serif;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #000;
             margin: 0;
             padding: 0;
-            background: #f4f4f4;
+            background: #ffffff;
             overflow-y: auto;
             transition: background 0.3s, color 0.3s;
         }
@@ -22,14 +26,14 @@
         header {
             background-color: #2c3e50;
             color: white;
-            padding: 1em;
+            padding: 1.5em 0;
             text-align: center;
             position: relative;
         }
         .container {
-            padding: 2em;
+            padding: 2em 3em;
             max-width: 800px;
-            margin: auto;
+            margin: 2em auto;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             border-radius: 10px;
@@ -38,6 +42,9 @@
         body.dark-mode .container {
             background: #1e1e1e;
         }
+        .instructions { background: #f8f8f8; padding: 1em; border-radius: 10px; margin-bottom: 1em; }
+        .instructions li { margin: 0.5em 0; }
+        body.dark-mode .instructions { background: #2a2a2a; }
         label {
             display: block;
             margin-top: 1em;
@@ -57,7 +64,7 @@
             background-color: #27ae60;
             border: none;
             color: white;
-            font-size: 1em;
+            font-size: 1.1em;
             cursor: pointer;
             border-radius: 5px;
         }
@@ -82,6 +89,8 @@
         #calendar .fc-timegrid-body {
             overflow: visible !important;
         }
+        h1 { font-size: 2.2em; margin: 0.2em 0; }
+        h2 { font-size: 1.5em; margin: 0.2em 0 0.8em; }
         @media screen and (max-width: 600px) {
             body { font-size: 16px; }
             .container { padding: 1em; }
@@ -100,6 +109,13 @@
 </header>
 
 <div class="container">
+    <div class="instructions">
+        <ol>
+            <li>1️⃣ Choisissez <strong>chambre</strong>, <strong>date</strong> et <strong>heure</strong>.</li>
+            <li>2️⃣ Sélectionnez la <strong>machine</strong> et les <strong>tournées</strong>.</li>
+            <li>3️⃣ Entrez le <strong>code</strong> puis validez.</li>
+        </ol>
+    </div>
     <form id="reservation-form">
         <label>Chambre</label>
         <select id="chambre" required></select>
