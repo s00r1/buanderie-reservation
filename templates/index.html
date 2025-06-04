@@ -168,6 +168,8 @@
     <div class="modal-content" style="background:white; padding:20px; border-radius:10px; text-align:center;">
         <h3>Réservation confirmée ✅</h3>
         <div id="receipt-details" style="margin:15px 0;"></div>
+        <a id="receipt-open" href="#" target="_blank" style="display:block;margin-bottom:10px;">Voir le reçu</a>
+        <a id="receipt-download" href="#" style="display:block;margin-bottom:10px;">Télécharger le PDF</a>
         <button onclick="printReceipt()">Imprimer le reçu</button>
         <button onclick="closeConfirm()" style="margin-top:10px;">Fermer</button>
     </div>
@@ -212,6 +214,8 @@ function printReceipt() {
 function showConfirmation(reservation) {
     const details = `Chambre ${reservation.chambre}<br>Date : ${reservation.date}<br>Début : ${reservation.start.split('T')[1]}<br>Fin : ${reservation.end.split('T')[1]}<br>Code : ${reservation.code}`;
     document.getElementById("receipt-details").innerHTML = details;
+    document.getElementById("receipt-open").href = `/receipt/${reservation.id}`;
+    document.getElementById("receipt-download").href = `/receipt/${reservation.id}?pdf=1`;
     document.getElementById("confirm-modal").style.display = "flex";
 }
 

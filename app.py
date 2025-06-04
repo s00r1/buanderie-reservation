@@ -1,10 +1,11 @@
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, make_response
 import json
 import logging
 import os
 import re
 from datetime import datetime
+from fpdf import FPDF
 from filelock import FileLock
 
 logging.basicConfig(level=logging.INFO)
@@ -81,6 +82,8 @@ def reserver():
 
     save_reservations(reservations)
 
+    new_id = len(reservations) - 1
+
     response_payload = {
         "status": "ok",
         "reservation": {
@@ -89,7 +92,8 @@ def reserver():
             "start": start,
             "end": end,
             "machine": data["machine"],
-            "code": data["code"]
+            "code": data["code"],
+            "id": new_id
         }
     }
 
@@ -126,6 +130,37 @@ def delete_reservation():
         return jsonify({"status": "deleted"})
     else:
         return jsonify({"status": "error", "message": "❌ Code incorrect ou réservation introuvable."}), 403
+
+
+@app.route("/receipt/<int:res_id>")
+def receipt(res_id: int):
+    reservations = load_reservations()
+    if res_id < 0 or res_id >= len(reservations):
+        return "Reservation not found", 404
+    r = reservations[res_id]
+    if request.args.get("pdf") == "1":
+        pdf = FPDF(format="A6")
+        pdf.add_page()
+        pdf.set_font("Arial", "B", 16)
+        pdf.cell(0, 10, "Reçu de réservation", ln=True, align="C")
+        pdf.set_font("Arial", "", 12)
+        pdf.cell(0, 8, r["title"], ln=True)
+        pdf.cell(0, 8, f"Machine: {r['machine']}", ln=True)
+        pdf.cell(0, 8, f"Début: {r['start'].replace('T', ' ')}", ln=True)
+        pdf.cell(0, 8, f"Fin: {r['end'].replace('T', ' ')}", ln=True)
+        pdf.set_font("Arial", "I", 8)
+        pdf.cell(0, 8, f"Hotel Grill - {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=True, align="C")
+        response = make_response(pdf.output(dest="S").encode("latin-1"))
+        response.headers["Content-Type"] = "application/pdf"
+        response.headers["Content-Disposition"] = "attachment; filename=receipt.pdf"
+        return response
+
+    return render_template(
+        "receipt.html",
+        reservation=r,
+        hotel_name="Hotel Grill",
+        generated=datetime.now(),
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
