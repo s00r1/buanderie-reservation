@@ -7,6 +7,7 @@ import pytest
 # Configure a temporary data file before importing the app
 DATA_FILE = os.path.join(tempfile.gettempdir(), "test_reservations.json")
 os.environ["RESERVATIONS_FILE"] = DATA_FILE
+os.environ["ADMIN_CODE"] = "s00r1"
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from app import app, DATA_FILE as APP_DATA_FILE, load_reservations
@@ -71,3 +72,24 @@ def test_duplicate_reservation_conflict(client):
     assert "déjà réservé" in second.get_json()["message"]
     reservations = load_reservations()
     assert len(reservations) == 1
+
+
+def test_admin_can_delete_any_reservation(client):
+    payload = {
+        "code": "1111",
+        "date": "2025-01-02",
+        "heure": "08:00",
+        "tournees": 1,
+        "machine": "lave-linge",
+        "chambre": "2",
+    }
+    # create reservation with regular code
+    resp = client.post("/reserver", json=payload)
+    assert resp.status_code == 200
+
+    # admin deletes it using the admin code
+    delete_payload = {"start": "2025-01-02T08:00", "code": "s00r1"}
+    delete = client.post("/delete_reservation", json=delete_payload)
+    assert delete.status_code == 200
+    assert delete.get_json()["status"] == "deleted"
+    assert load_reservations() == []
