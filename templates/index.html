@@ -12,6 +12,7 @@
             margin: 0;
             padding: 0;
             background: #f4f4f4;
+            overflow-y: auto;
             transition: background 0.3s, color 0.3s;
         }
         body.dark-mode {
@@ -76,6 +77,10 @@
         }
         #calendar {
             margin-top: 2em;
+        }
+        #calendar .fc-scroller,
+        #calendar .fc-timegrid-body {
+            overflow: visible !important;
         }
         @media screen and (max-width: 600px) {
             body { font-size: 16px; }
@@ -204,6 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
         locale: 'fr',
         slotMinTime: '07:00:00',
         slotMaxTime: '23:00:00',
+        height: 'auto',
+        expandRows: true,
         events: '/get_reservations',
         eventDidMount: function(info) {
             const now = new Date();
