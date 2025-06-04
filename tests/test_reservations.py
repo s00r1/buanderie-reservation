@@ -120,3 +120,23 @@ def test_overlapping_reservation_rejected(client):
     assert "déjà réservé" in resp2.get_json()["message"]
     reservations = load_reservations()
     assert len(reservations) == 1
+
+
+def test_get_reservations_hides_code(client):
+    payload = {
+        "code": "1234",
+        "date": "2025-01-04",
+        "heure": "15:00",
+        "tournees": 1,
+        "machine": "lave-linge",
+        "chambre": "3",
+    }
+    resp = client.post("/reserver", json=payload)
+    assert resp.status_code == 200
+
+    resp = client.get("/get_reservations")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert isinstance(data, list)
+    assert data
+    assert "code" not in data[0]

@@ -85,7 +85,11 @@ def reserver():
 @app.route("/get_reservations", methods=["GET"])
 def get_reservations():
     reservations = load_reservations()
-    return jsonify(reservations)
+    sanitized = [
+        {k: v for k, v in r.items() if k != "code"}
+        for r in reservations
+    ]
+    return jsonify(sanitized)
 
 @app.route("/delete_reservation", methods=["POST"])
 def delete_reservation():
