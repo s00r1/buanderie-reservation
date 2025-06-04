@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+from filelock import FileLock
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,6 +14,23 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 DATA_FILE = os.getenv("RESERVATIONS_FILE", "reservations.json")
 ADMIN_CODE = os.getenv("ADMIN_CODE", "s0r1")
 CODE_REGEX = re.compile(r"^\d{4}$")
+LOCK_FILE = DATA_FILE + ".lock"
+
+
+def load_reservations():
+    try:
+        with FileLock(LOCK_FILE):
+            with open(DATA_FILE, "r") as f:
+                return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logging.warning("Could not load reservations: %s", e)
+        return []
+
+
+def save_reservations(reservations):
+    with FileLock(LOCK_FILE):
+        with open(DATA_FILE, "w") as f:
+            json.dump(reservations, f)
 
 @app.route("/")
 def index():
@@ -24,12 +42,7 @@ def reserver():
     code = str(data.get("code", ""))
     if code != ADMIN_CODE and not CODE_REGEX.fullmatch(code):
         return jsonify({"status": "error", "message": "❌ Format de code invalide."}), 400
-    try:
-        with open(DATA_FILE, "r") as f:
-            reservations = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        logging.warning("Could not load reservations: %s", e)
-        reservations = []
+    reservations = load_reservations()
 
     start = f"{data['date']}T{data['heure']}"
     end_hour = int(data['heure'].split(":")[0]) + int(data['tournees'])
@@ -57,19 +70,13 @@ def reserver():
         "code": data["code"]
     })
 
-    with open(DATA_FILE, "w") as f:
-        json.dump(reservations, f)
+    save_reservations(reservations)
 
     return jsonify({"status": "ok"})
 
 @app.route("/get_reservations", methods=["GET"])
 def get_reservations():
-    try:
-        with open(DATA_FILE, "r") as f:
-            reservations = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        logging.warning("Could not load reservations: %s", e)
-        reservations = []
+    reservations = load_reservations()
     return jsonify(reservations)
 
 @app.route("/delete_reservation", methods=["POST"])
@@ -78,12 +85,7 @@ def delete_reservation():
     code = str(data.get("code", ""))
     if code != ADMIN_CODE and not CODE_REGEX.fullmatch(code):
         return jsonify({"status": "error", "message": "❌ Format de code invalide."}), 400
-    try:
-        with open(DATA_FILE, "r") as f:
-            reservations = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        logging.warning("Could not load reservations: %s", e)
-        reservations = []
+    reservations = load_reservations()
 
     updated = []
     deleted = False
@@ -95,8 +97,7 @@ def delete_reservation():
         updated.append(r)
 
     if deleted:
-        with open(DATA_FILE, "w") as f:
-            json.dump(updated, f)
+        save_reservations(updated)
         return jsonify({"status": "deleted"})
     else:
         return jsonify({"status": "error", "message": "❌ Code incorrect ou réservation introuvable."}), 403
