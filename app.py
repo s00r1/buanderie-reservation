@@ -153,6 +153,7 @@ def receipt(res_id: int):
         pdf.cell(0, 6, f"Machine : {r['machine']}", ln=True)
         pdf.cell(0, 6, f"Début : {r['start'].replace('T', ' ')}", ln=True)
         pdf.cell(0, 6, f"Fin : {r['end'].replace('T', ' ')}", ln=True)
+        pdf.cell(0, 6, f"Code : {r['code']}", ln=True)
         pdf.ln(4)
         pdf.set_font("Arial", "I", 8)
         if created_dt:
