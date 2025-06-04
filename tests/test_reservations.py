@@ -93,3 +93,30 @@ def test_admin_can_delete_any_reservation(client):
     assert delete.status_code == 200
     assert delete.get_json()["status"] == "deleted"
     assert load_reservations() == []
+
+
+def test_overlapping_reservation_rejected(client):
+    first = {
+        "code": "1234",
+        "date": "2025-01-03",
+        "heure": "12:00",
+        "tournees": 2,
+        "machine": "lave-linge",
+        "chambre": "1",
+    }
+    second = {
+        "code": "5678",
+        "date": "2025-01-03",
+        "heure": "13:00",
+        "tournees": 1,
+        "machine": "lave-linge",
+        "chambre": "2",
+    }
+
+    resp1 = client.post("/reserver", json=first)
+    assert resp1.status_code == 200
+    resp2 = client.post("/reserver", json=second)
+    assert resp2.status_code == 409
+    assert "déjà réservé" in resp2.get_json()["message"]
+    reservations = load_reservations()
+    assert len(reservations) == 1
