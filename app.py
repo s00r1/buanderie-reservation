@@ -70,17 +70,30 @@ def reserver():
     if total_journalier + int(data["tournees"]) > 3:
         return jsonify({"status": "error", "message": "❌ Limite de 3 tournées par machine et par jour atteinte."}), 400
 
-    reservations.append({
+    reservation_record = {
         "title": f"Chambre {data['chambre']}",
         "start": start,
         "end": end,
         "machine": data["machine"],
         "code": data["code"]
-    })
+    }
+    reservations.append(reservation_record)
 
     save_reservations(reservations)
 
-    return jsonify({"status": "ok"})
+    response_payload = {
+        "status": "ok",
+        "reservation": {
+            "chambre": data["chambre"],
+            "date": data["date"],
+            "start": start,
+            "end": end,
+            "machine": data["machine"],
+            "code": data["code"]
+        }
+    }
+
+    return jsonify(response_payload)
 
 @app.route("/get_reservations", methods=["GET"])
 def get_reservations():
