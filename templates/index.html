@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -38,6 +37,7 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             border-radius: 10px;
             overflow: visible;
+            text-align: center;
         }
         body.dark-mode .container {
             background: #1e1e1e;
@@ -82,9 +82,17 @@
             height: 200px;
             margin-bottom: 10px;
         }
+
         #calendar {
-            margin-top: 2em;
+            margin: 2em auto;
+            max-width: 100%;
         }
+
+        #calendar > div {
+            text-align: left; /* pour éviter de centrer les heures */
+        }
+
+
         #calendar .fc-scroller,
         #calendar .fc-timegrid-body {
             overflow: visible !important;
@@ -102,17 +110,39 @@
           list-style: none;
           padding-left: 0;
         }
-        
+
+
+        input#code {
+            margin: 0 auto;
+            display: block;
+        }
+
+        #chambre,
+        #date,
+        #heure,
+        #machine,
+        #tournees {
+            max-width: 12em;
+            display: block;
+            margin: 0.5em auto;
+        }
+       
+ 
     </style>
 </head>
 <body>
 
-<header>
-    <div id="darkToggle">🌘</div>
-    <h1>Hotel Grill</h1>
-    <img src="{{ url_for('static', filename='logo.gif') }}" alt="Logo Hôtel" class="logo">
-    <h2>Réservation Buanderie</h2>
-</header>
+<body>
+
+<div class="page-wrapper">
+    <header>
+        <div id="darkToggle">🌘</div>
+        <h1>Hotel Grill</h1>
+        <img src="{{ url_for('static', filename='logo.gif') }}" alt="Logo Hôtel" class="logo">
+        <h2>Réservation Buanderie</h2>
+    </header>
+    <div class="container">...</div>
+</div>
 
 <div class="container">
     <div class="instructions">
