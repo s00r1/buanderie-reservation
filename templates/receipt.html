@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <title>Reçu</title>
     <style>
-        body { width: 8cm; margin: 0 auto; font-family: Arial, sans-serif; }
-        h1 { font-size: 1.2em; text-align: center; margin-bottom: 10px; }
-        .details { font-size: 0.9em; margin: 3px 0; }
-        footer { font-size: 0.7em; font-style: italic; text-align: center; margin-top: 15px; }
+        body { width: 80mm; margin: 0 auto; font-family: Arial, sans-serif; font-size: 11pt; }
+        h1 { font-size: 14pt; text-align: center; margin: 5px 0 10px; }
+        .details { font-size: 11pt; margin: 2px 0; }
+        footer { font-size: 8pt; font-style: italic; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -21,6 +21,9 @@
     <footer>{{ hotel_name }} - réservation effectuée le {{ created.strftime('%Y-%m-%d %H:%M') }}</footer>
     {% else %}
     <footer>{{ hotel_name }}</footer>
+    {% endif %}
+    {% if auto_print %}
+    <script>window.print();</script>
     {% endif %}
 </body>
 </html>
