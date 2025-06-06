@@ -5,6 +5,8 @@ Cette application permet de gérer la réservation en ligne des machines d'une b
 ## Installation
 
 Assurez-vous d'avoir Python installé, puis installez les dépendances :
+Ce projet est testé avec **Python&nbsp;3.11**. Le fichier `.tool-versions` permet
+de l'installer automatiquement sur des plateformes comme Fly.io.
 
 ```bash
 pip install -r requirements.txt
