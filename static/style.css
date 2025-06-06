@@ -135,3 +135,12 @@ input#code {
 .receipt-link { display:block; margin-bottom:10px; }
 #receipt-details { margin:15px 0; }
 .code-input { max-width:8em; }
+.error-box {
+    background-color: #ffdddd;
+    color: #a94442;
+    border: 1px solid #a94442;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 5px;
+    display: none;
+}

@@ -7,9 +7,16 @@ function confirmDelete() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ start: selectedEvent.startStr, code })
     })
-    .then(res => {
-        if (res.status === 200) location.reload();
-        else document.getElementById("delete-error").style.display = "block";
+    .then(async res => {
+        if (res.status === 200) {
+            location.reload();
+        } else {
+            const data = await res.json().catch(() => ({}));
+            const msg = data.message || "❌ Code incorrect";
+            const err = document.getElementById("delete-error");
+            err.textContent = msg;
+            err.style.display = "block";
+        }
     });
 }
 
@@ -26,6 +33,13 @@ function closeConfirm() {
 function printReceipt() {
     const href = document.getElementById("receipt-open").href;
     window.open(href + "?auto_print=1", "_blank");
+}
+
+function showError(message) {
+    const box = document.getElementById("error-box");
+    box.textContent = message;
+    box.style.display = "block";
+    setTimeout(() => { box.style.display = "none"; }, 5000);
 }
 
 function showConfirmation(reservation) {
@@ -109,12 +123,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const now = new Date();
 
         if (fullStart < now) {
-            alert("❌ Impossible de réserver dans le passé.");
+            showError("❌ Impossible de réserver dans le passé.");
             return;
         }
 
         if (fullEnd.getHours() > 23) {
-            alert("❌ La buanderie ferme à 23h00. Veuillez choisir un créneau plus tôt.");
+            showError("❌ La buanderie ferme à 23h00. Veuillez choisir un créneau plus tôt.");
             return;
         }
 
@@ -134,10 +148,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (res.ok) {
                 showConfirmation(data.reservation);
             } else {
-                alert(data.message || "❌ Erreur lors de la réservation.");
+                showError(data.message || "❌ Erreur lors de la réservation.");
             }
         }).catch(() => {
-            alert("❌ Erreur de connexion.");
+            showError("❌ Erreur de connexion.");
         });
     });
 });
