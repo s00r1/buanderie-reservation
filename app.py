@@ -142,6 +142,7 @@ def receipt(res_id: int):
     r = reservations[res_id]
     created_str = r.get("created")
     created_dt = datetime.fromisoformat(created_str) if created_str else None
+    auto_print = request.args.get("auto_print") == "1"
     if request.args.get("pdf") == "1":
         pdf = FPDF(unit="mm", format=(80, 120))
         pdf.add_page()
@@ -172,6 +173,7 @@ def receipt(res_id: int):
         hotel_name="Hotel Grill",
         generated=datetime.now(),
         created=created_dt,
+        auto_print=auto_print,
     )
 
 if __name__ == "__main__":

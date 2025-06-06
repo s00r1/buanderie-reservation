@@ -24,11 +24,8 @@ function closeConfirm() {
 }
 
 function printReceipt() {
-    const receipt = document.getElementById("receipt-details").innerHTML;
-    const win = window.open("", "_blank");
-    win.document.write("<html><head><title>Reçu</title></head><body>" + receipt + "</body></html>");
-    win.document.close();
-    win.print();
+    const href = document.getElementById("receipt-open").href;
+    window.open(href + "?auto_print=1", "_blank");
 }
 
 function showConfirmation(reservation) {
