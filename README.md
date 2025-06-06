@@ -29,13 +29,13 @@ Deux variables d'environnement permettent d'ajuster le comportement de l'applica
 
 ## Exécution en production
 
-Pour un environnement de production, il est recommandé d'utiliser Gunicorn :
+Pour un environnement de production, il est recommandé d'utiliser Gunicorn et de lier l'application au port fourni par la plateforme. Cela permet un fonctionnement identique sur Fly.io, Railway ou tout autre hébergeur définissant la variable `PORT` :
 
 ```bash
-gunicorn app:app
+gunicorn app:app --bind 0.0.0.0:${PORT:-8080}
 ```
 
-Le `Procfile` fourni contient cette commande afin de faciliter le déploiement sur des plateformes comme Heroku.
+Le `Procfile` inclus utilise cette commande afin de faciliter le déploiement sur différentes plateformes.
 
 ## Tests
 
