@@ -5,13 +5,31 @@ This application manages online reservations for a laundry's machines. It is wri
 - [Version française](README.md)
 - [النسخة العربية](README.ar.md)
 
+## Table of contents
+- [Installation](#installation)
+- [Running locally](#running-locally)
+- [Configuration](#configuration)
+- [Data management](#data-management)
+- [Deploying on PythonAnywhere](#deploying-on-pythonanywhere)
+- [Tests](#tests)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Installation
 
-Make sure you have Python installed, then install the dependencies:
+1. Download or clone this repository.
+2. *(Optional)* Create a virtual environment:
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. Install the dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ## Running locally
 
@@ -23,12 +41,52 @@ python app.py
 
 The application will then be available at [http://localhost:5000](http://localhost:5000).
 
-## Configuration variables
+## Configuration
 
-Two environment variables allow you to adjust the application's behavior:
+Two environment variables control the application's behaviour:
 
-- `RESERVATIONS_FILE`: path to the JSON file used to store reservations. By default, `reservations.json` in the project root is used.
-- `ADMIN_CODE`: secret code that allows deleting any reservation. The default value is `s00r1`.
+- `RESERVATIONS_FILE` – path to the JSON file storing reservations. By default it is `reservations.json` at the repository root.
+- `ADMIN_CODE` – secret code that allows deleting any reservation. Default is `s00r1`.
+
+## Data management
+
+Reservations are kept in the file specified by `RESERVATIONS_FILE`. To start with a blank database, create this file containing only:
+
+```json
+[]
+```
+
+The application locks the file while writing to avoid corruption.
+
+## Deploying on PythonAnywhere
+
+1. Create an account on [pythonanywhere.com](https://www.pythonanywhere.com/) and open a Bash console.
+2. Clone the project and enter the directory:
+
+   ```bash
+   git clone https://github.com/your-user/buanderie-reservation.git
+   cd buanderie-reservation
+   ```
+
+3. Create a virtual environment and install the dependencies:
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+4. From the **Web** tab, create a new *Manual configuration* application and point it to this folder.
+5. Edit the WSGI file to expose the Flask app:
+
+   ```python
+   import sys
+   sys.path.insert(0, '/home/<user>/buanderie-reservation')
+   from app import app as application
+   ```
+
+6. In the *Environment Variables* section, set `RESERVATIONS_FILE` and `ADMIN_CODE` (e.g. `RESERVATIONS_FILE=/home/<user>/buanderie-reservation/reservations.json`).
+7. Finally click **Reload** to start the application.
 
 ## Running in production
 
