@@ -31,6 +31,12 @@ Cette application permet de gérer la réservation en ligne des machines d'une b
    pip install -r requirements.txt
    ```
 
+4. Lors de la première installation, créez un fichier `reservations.json` vide à la racine du projet :
+
+   ```bash
+   echo "[]" > reservations.json
+   ```
+
 ## Lancement en local
 
 Exécutez directement le fichier `app.py` pour lancer le serveur local :
