@@ -10,6 +10,7 @@ This application manages online reservations for a laundry's machines. It is wri
 - [Running locally](#running-locally)
 - [Configuration](#configuration)
 - [Data management](#data-management)
+- [User guide](#user-guide)
 - [Deploying on PythonAnywhere](#deploying-on-pythonanywhere)
 - [Tests](#tests)
 - [Contributing](#contributing)
@@ -64,6 +65,25 @@ The JSON file lives on the server hosting the application (e.g.
 [PythonAnywhere](https://www.pythonanywhere.com/)). Every visitor shares this
 file, so any reservation created or removed becomes immediately visible to other
 users.
+
+## User guide
+
+### Making a reservation
+
+1. Select your **room**.
+2. Pick the **date** and **start time**.
+3. Choose the **machine**.
+4. Specify the **number of cycles** (1–3).
+5. Enter a **4-digit code** and confirm.
+
+Rules:
+- the code must contain exactly four digits;
+- a single machine cannot exceed **3 cycles per day**;
+- the slot must end **before 11 p.m.**
+
+### Cancelling
+
+Click the booking in the calendar and enter the same code to confirm deletion.
 
 ## Deploying on PythonAnywhere
 

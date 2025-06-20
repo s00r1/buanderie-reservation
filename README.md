@@ -10,6 +10,7 @@ Cette application permet de gérer la réservation en ligne des machines d'une b
 - [Lancement en local](#lancement-en-local)
 - [Configuration](#configuration)
 - [Gestion des données](#gestion-des-données)
+- [Guide utilisateur](#guide-utilisateur)
 - [Déploiement sur PythonAnywhere](#déploiement-sur-pythonanywhere)
 - [Tests](#tests)
 - [Contribuer](#contribuer)
@@ -65,6 +66,25 @@ Ce fichier se situe sur le serveur hébergeant l'application (comme sur
 [PythonAnywhere](https://www.pythonanywhere.com/)). Toutes les personnes
 consultant le site partagent donc le même fichier : lorsqu'une réservation est
 ajoutée ou supprimée, la modification est visible par tous les utilisateurs.
+
+## Guide utilisateur
+
+### Réaliser une réservation
+
+1. Choisissez votre **chambre**.
+2. Sélectionnez la **date** et l'**heure** de début.
+3. Indiquez la **machine** désirée.
+4. Précisez le **nombre de tournées** (1 à 3).
+5. Entrez un **code à 4 chiffres** puis validez.
+
+Règles :
+- le code doit comporter exactement quatre chiffres ;
+- une machine ne peut dépasser **3 tournées par jour** ;
+- le créneau doit se terminer **avant 23h**.
+
+### Annuler une réservation
+
+Cliquez sur la réservation dans le calendrier puis saisissez le même code pour confirmer la suppression.
 
 ## Déploiement sur PythonAnywhere
 
