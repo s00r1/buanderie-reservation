@@ -31,6 +31,12 @@ This application manages online reservations for a laundry's machines. It is wri
    pip install -r requirements.txt
    ```
 
+4. When installing for the first time, create an empty `reservations.json` file at the project root:
+
+   ```bash
+   echo "[]" > reservations.json
+   ```
+
 ## Running locally
 
 Execute the `app.py` file directly to start the local server:

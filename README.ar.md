@@ -30,6 +30,12 @@
    pip install -r requirements.txt
    ```
 
+4. عند التثبيت لأول مرة، أنشئ ملف `reservations.json` فارغ في جذر المشروع:
+
+   ```bash
+   echo "[]" > reservations.json
+   ```
+
 ## التشغيل محليا
 
 اشغل ملف `app.py` مباشرة لبدء الخادم المحلي:
