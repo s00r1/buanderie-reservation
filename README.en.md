@@ -17,6 +17,8 @@ This application manages online reservations for a laundry's machines. It is wri
 
 ## Installation
 
+Ensure that **Python 3** and `git` are available on your machine.
+
 1. Download or clone this repository.
 2. *(Optional)* Create a virtual environment:
 
@@ -58,6 +60,11 @@ Reservations are kept in the file specified by `RESERVATIONS_FILE`. To start wit
 
 The application locks the file while writing to avoid corruption.
 
+The JSON file lives on the server hosting the application (e.g.
+[PythonAnywhere](https://www.pythonanywhere.com/)). Every visitor shares this
+file, so any reservation created or removed becomes immediately visible to other
+users.
+
 ## Deploying on PythonAnywhere
 
 1. Create an account on [pythonanywhere.com](https://www.pythonanywhere.com/) and open a Bash console.
@@ -90,13 +97,15 @@ The application locks the file while writing to avoid corruption.
 
 ## Running in production
 
-For a production environment, it is recommended to use Gunicorn and bind the application to the port provided by the platform. This works the same on Fly.io, Railway or any host setting the `PORT` variable:
+PythonAnywhere runs the application with **Gunicorn**. The provided `Procfile`
+launches the server with:
 
 ```bash
 gunicorn app:app --bind 0.0.0.0:${PORT:-8080}
 ```
 
-The included `Procfile` uses this command to simplify deployment on various platforms.
+The port is handled automatically by the platform. You can reuse this command to
+test locally or on any compatible host.
 
 ## Tests
 

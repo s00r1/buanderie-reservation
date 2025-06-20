@@ -17,6 +17,9 @@ Cette application permet de gérer la réservation en ligne des machines d'une b
 
 ## Installation
 
+Assurez-vous de disposer de **Python 3** et de l'outil `git` sur votre
+ordinateur.
+
 1. Téléchargez ou clonez ce dépôt sur votre machine.
 2. *(Optionnel)* créez un environnement virtuel :
 
@@ -58,6 +61,11 @@ Toutes les réservations sont enregistrées dans le fichier désigné par `RESER
 
 L'application verrouille automatiquement ce fichier pour éviter les accès concurrents.
 
+Ce fichier se situe sur le serveur hébergeant l'application (comme sur
+[PythonAnywhere](https://www.pythonanywhere.com/)). Toutes les personnes
+consultant le site partagent donc le même fichier : lorsqu'une réservation est
+ajoutée ou supprimée, la modification est visible par tous les utilisateurs.
+
 ## Déploiement sur PythonAnywhere
 
 1. Créez un compte sur [pythonanywhere.com](https://www.pythonanywhere.com/) et ouvrez une console Bash.
@@ -90,13 +98,15 @@ L'application verrouille automatiquement ce fichier pour éviter les accès conc
 
 ## Exécution en production
 
-Pour un environnement de production, il est recommandé d'utiliser Gunicorn et de lier l'application au port fourni par la plateforme. Cela permet un fonctionnement identique sur Fly.io, Railway ou tout autre hébergeur définissant la variable `PORT` :
+PythonAnywhere exécute l'application via **Gunicorn**. Le fichier `Procfile`
+fourni lance la commande suivante :
 
 ```bash
 gunicorn app:app --bind 0.0.0.0:${PORT:-8080}
 ```
 
-Le `Procfile` inclus utilise cette commande afin de faciliter le déploiement sur différentes plateformes.
+Le port est géré automatiquement par la plateforme. Vous pouvez utiliser la même
+commande pour tester localement ou sur tout autre hébergeur compatible.
 
 ## Tests
 
