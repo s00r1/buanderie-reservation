@@ -1,6 +1,9 @@
 # Buanderie Reservation
 
-Cette application permet de gérer la réservation en ligne des machines d'une buanderie. Elle est écrite en Python avec le microframework Flask.
+Cette application permet de gérer la réservation en ligne des machines d'une buanderie. Elle est écrite en Python avec le microframework Flask. Une version en ligne est disponible à l'adresse [https://soury.pythonanywhere.com](https://soury.pythonanywhere.com/).
+
+- [English version](README.en.md)
+- [النسخة العربية](README.ar.md)
 
 ## Installation
 
@@ -48,5 +51,9 @@ pytest
 ## Contribuer
 
 Les contributions sont les bienvenues ! Ouvrez une issue pour discuter d'un changement ou proposez directement une pull request. Veillez à faire tourner `pytest` avant toute soumission.
+
+---
+
+Ce projet est distribué sous licence MIT. Consultez le fichier [LICENSE](LICENSE) pour plus de détails.
 
 
