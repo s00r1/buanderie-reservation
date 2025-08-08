@@ -11,6 +11,7 @@ Cette application permet de gérer la réservation en ligne des machines d'une b
 - [Configuration](#configuration)
 - [Gestion des données](#gestion-des-données)
 - [Guide utilisateur](#guide-utilisateur)
+- [Déploiement sur NanoPi Neo](#déploiement-sur-nanopi-neo-ou-équivalents)
 - [Déploiement sur PythonAnywhere](#déploiement-sur-pythonanywhere)
 - [Tests](#tests)
 - [Contribuer](#contribuer)
@@ -85,6 +86,97 @@ Règles :
 ### Annuler une réservation
 
 Cliquez sur la réservation dans le calendrier puis saisissez le même code pour confirmer la suppression.
+
+## Déploiement sur NanoPi Neo (ou équivalents)
+
+Ce guide décrit une installation complète sur une petite carte ARM (NanoPi Neo,
+Raspberry Pi, etc.) fonctionnant sous un système de type **Debian/Armbian**.
+
+### 1. Préparer la carte
+
+- Mettez le système à jour et installez les outils nécessaires :
+
+  ```bash
+  sudo apt update
+  sudo apt install -y python3 python3-venv python3-pip git
+  ```
+
+### 2. Récupérer l'application
+
+- Clonez ce dépôt puis placez-vous dans le dossier :
+
+  ```bash
+  git clone https://github.com/votre-utilisateur/buanderie-reservation.git
+  cd buanderie-reservation
+  ```
+
+- *(Optionnel)* créez un environnement virtuel et installez les dépendances :
+
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install -r requirements.txt
+  ```
+
+### 3. Configurer l'application
+
+Définissez les variables d'environnement suivantes (à adapter à votre
+configuration) :
+
+```bash
+export RESERVATIONS_FILE=/home/pi/buanderie-reservation/reservations.json
+export ADMIN_CODE=votre_code_secret
+```
+
+### 4. Lancer le serveur
+
+- Pour un essai rapide (port 5000) :
+
+  ```bash
+  python app.py
+  ```
+
+- Pour un service réseau plus robuste (port 8080) :
+
+  ```bash
+  gunicorn app:app --bind 0.0.0.0:8080
+  ```
+
+### 5. Rendre le service permanent *(facultatif)*
+
+Afin que l'application redémarre automatiquement, créez un service `systemd` :
+
+```bash
+sudo nano /etc/systemd/system/buanderie.service
+```
+
+Contenu minimal du fichier :
+
+```ini
+[Unit]
+Description=Buanderie Reservation
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/buanderie-reservation
+ExecStart=/usr/bin/python3 /home/pi/buanderie-reservation/app.py
+Environment="RESERVATIONS_FILE=/home/pi/buanderie-reservation/reservations.json"
+Environment="ADMIN_CODE=votre_code_secret"
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Activez ensuite le service :
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now buanderie.service
+```
+
+L'application est désormais accessible à l'adresse
+`http://<ip_de_la_carte>:5000` (ou sur le port utilisé dans `gunicorn`).
 
 ## Déploiement sur PythonAnywhere
 
