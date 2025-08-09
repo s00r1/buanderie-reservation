@@ -46,9 +46,9 @@ def reserver():
         return jsonify({"status": "error", "message": "❌ Format de code invalide."}), 400
     reservations = load_reservations()
 
-    start = f"{data['date']}T{data['heure']}"
+    start = "{}T{}".format(data['date'], data['heure'])
     end_hour = int(data['heure'].split(":")[0]) + int(data['tournees'])
-    end = f"{data['date']}T{str(end_hour).zfill(2)}:00"
+    end = "{}T{}:00".format(data['date'], str(end_hour).zfill(2))
 
     new_start = datetime.fromisoformat(start)
     new_end = datetime.fromisoformat(end)
@@ -65,14 +65,14 @@ def reserver():
         int(r["end"].split("T")[1].split(":")[0]) - int(r["start"].split("T")[1].split(":")[0])
         for r in reservations
         if r["machine"] == data["machine"]
-        and r["title"] == f"Chambre {data['chambre']}"
+        and r["title"] == "Chambre {}".format(data['chambre'])
         and r["start"].startswith(data["date"])
     )
     if total_journalier + int(data["tournees"]) > 3:
         return jsonify({"status": "error", "message": "❌ Limite de 3 tournées par machine et par jour atteinte."}), 400
 
     reservation_record = {
-        "title": f"Chambre {data['chambre']}",
+        "title": "Chambre {}".format(data['chambre']),
         "start": start,
         "end": end,
         "machine": data["machine"],
@@ -151,14 +151,14 @@ def receipt(res_id: int):
         pdf.ln(2)
         pdf.set_font("Arial", "", 11)
         pdf.cell(0, 6, r["title"], ln=True)
-        pdf.cell(0, 6, f"Machine : {r['machine']}", ln=True)
-        pdf.cell(0, 6, f"Début : {r['start'].replace('T', ' ')}", ln=True)
-        pdf.cell(0, 6, f"Fin : {r['end'].replace('T', ' ')}", ln=True)
-        pdf.cell(0, 6, f"Code : {r['code']}", ln=True)
+        pdf.cell(0, 6, "Machine : {}".format(r['machine']), ln=True)
+        pdf.cell(0, 6, "Début : {}".format(r['start'].replace('T', ' ')), ln=True)
+        pdf.cell(0, 6, "Fin : {}".format(r['end'].replace('T', ' ')), ln=True)
+        pdf.cell(0, 6, "Code : {}".format(r['code']), ln=True)
         pdf.ln(4)
         pdf.set_font("Arial", "I", 8)
         if created_dt:
-            footer_text = f"Hotel Grill - réservation effectuée le {created_dt.strftime('%Y-%m-%d %H:%M')}"
+            footer_text = "Hotel Grill - réservation effectuée le {}".format(created_dt.strftime('%Y-%m-%d %H:%M'))
         else:
             footer_text = "Hotel Grill"
         pdf.cell(0, 5, footer_text, ln=True, align="C")
