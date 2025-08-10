@@ -11,6 +11,7 @@ This application manages online reservations for a laundry's machines. It is wri
 - [Configuration](#configuration)
 - [Data management](#data-management)
 - [User guide](#user-guide)
+- [Deploying on NanoPi Neo (or equivalents)](#deploying-on-nanopi-neo-or-equivalents)
 - [Deploying on PythonAnywhere](#deploying-on-pythonanywhere)
 - [Tests](#tests)
 - [Contributing](#contributing)
@@ -84,6 +85,145 @@ Rules:
 ### Cancelling
 
 Click the booking in the calendar and enter the same code to confirm deletion.
+
+## Deploying on NanoPi Neo (or equivalents)
+
+This guide explains a full installation on a small ARM board (NanoPi Neo, Raspberry Pi, etc.) running a **Debian/Armbian**-based system.
+
+### 1. Prepare the board
+
+- Update the system and install the required tools:
+
+  ```bash
+  sudo apt update
+  sudo apt install -y python3 python3-venv python3-pip git
+  ```
+
+### 2. Get the application
+
+- Clone this repository and enter the directory:
+
+  ```bash
+  git clone https://github.com/your-user/buanderie-reservation.git
+  cd buanderie-reservation
+  ```
+
+- *(Optional)* Create a virtual environment and install the dependencies:
+
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install -r requirements.txt
+  ```
+
+### 3. Configure the application
+
+Set the following environment variables (adapt them to your setup):
+
+```bash
+export RESERVATIONS_FILE=/home/pi/buanderie-reservation/reservations.json
+export ADMIN_CODE=your_secret_code
+```
+
+### 4. Start the server
+
+- For a quick test (port 5000):
+
+  ```bash
+  python app.py
+  ```
+
+- For a more robust network service (port 8080):
+
+  ```bash
+  gunicorn app:app --bind 0.0.0.0:8080
+  ```
+
+### 5. Make the service persistent *(optional)*
+
+To restart the application automatically, create a `systemd` service:
+
+```bash
+sudo nano /etc/systemd/system/buanderie.service
+```
+
+Minimal content of the file:
+
+```ini
+[Unit]
+Description=Buanderie Reservation
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/buanderie-reservation
+ExecStart=/usr/bin/python3 /home/pi/buanderie-reservation/app.py
+Environment="RESERVATIONS_FILE=/home/pi/buanderie-reservation/reservations.json"
+Environment="ADMIN_CODE=your_secret_code"
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then enable the service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now buanderie.service
+```
+
+The application is now accessible at `http://<board_ip>:5000` (or on the port used by `gunicorn`).
+
+### 6. Simplifying access for users
+
+To offer a friendlier URL than `http://<board_ip>:5000`, you can assign a local hostname and redirect traffic to port 80:
+
+1. **Rename the machine to "buanderie"**
+
+   Edit `/etc/hosts`:
+
+   ```bash
+   sudo nano /etc/hosts
+   ```
+
+   Replace the line that looks like:
+
+   ```text
+   127.0.1.1    old-name
+   ```
+
+   with:
+
+   ```text
+   127.0.1.1    buanderie
+   ```
+
+2. **Enable mDNS resolution**
+
+   Install and start *Avahi* to access `buanderie.local` from your network:
+
+   ```bash
+   sudo apt install avahi-daemon
+   sudo systemctl enable avahi-daemon
+   sudo systemctl start avahi-daemon
+   ```
+
+3. **Redirect port 80 to 5000**
+
+   To avoid typing the port in the browser, redirect port 80 to the port 5000 used by Flask:
+
+   ```bash
+   sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 5000
+
+   # Save the rule so it survives reboots
+   sudo sh -c "iptables-save > /etc/iptables.rules"
+
+   # Reload rules automatically at startup
+   sudo sh -c 'echo -e "#!/bin/sh\niptables-restore < /etc/iptables.rules" > /etc/network/if-pre-up.d/iptables'
+   sudo chmod +x /etc/network/if-pre-up.d/iptables
+   ```
+
+After these steps, the application is reachable at `http://buanderie.local` without specifying a port.
 
 ## Deploying on PythonAnywhere
 
