@@ -50,14 +50,14 @@ def reserver():
     end_hour = int(data['heure'].split(":")[0]) + int(data['tournees'])
     end = "{}T{}:00".format(data['date'], str(end_hour).zfill(2))
 
-    new_start = datetime.fromisoformat(start)
-    new_end = datetime.fromisoformat(end)
+    new_start = datetime.strptime(start, "%Y-%m-%dT%H:%M")
+    new_end = datetime.strptime(end, "%Y-%m-%dT%H:%M")
 
     for r in reservations:
         if r["machine"] != data["machine"]:
             continue
-        existing_start = datetime.fromisoformat(r["start"])
-        existing_end = datetime.fromisoformat(r["end"])
+        existing_start = datetime.strptime(r["start"], "%Y-%m-%dT%H:%M")
+        existing_end = datetime.strptime(r["end"], "%Y-%m-%dT%H:%M")
         if new_start < existing_end and new_end > existing_start:
             return jsonify({"status": "error", "message": "❌ Ce créneau est déjà réservé pour cette machine."}), 409
 
@@ -141,7 +141,7 @@ def receipt(res_id: int):
         return "Reservation not found", 404
     r = reservations[res_id]
     created_str = r.get("created")
-    created_dt = datetime.fromisoformat(created_str) if created_str else None
+    created_dt = datetime.strptime(created_str, "%Y-%m-%d %H:%M") if created_str else None
     auto_print = request.args.get("auto_print") == "1"
     if request.args.get("pdf") == "1":
         pdf = FPDF(unit="mm", format=(80, 120))
