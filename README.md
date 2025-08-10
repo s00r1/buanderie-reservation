@@ -178,6 +178,62 @@ sudo systemctl enable --now buanderie.service
 L'application est désormais accessible à l'adresse
 `http://<ip_de_la_carte>:5000` (ou sur le port utilisé dans `gunicorn`).
 
+### 6. Simplifier l'accès pour les utilisateurs
+
+Pour offrir une URL plus conviviale que `http://<ip_de_la_carte>:5000`, il est
+possible d'attribuer un nom d'hôte local et de rediriger le trafic vers le port
+80 :
+
+1. **Renommer la machine en "buanderie"**
+
+   Éditez le fichier `/etc/hosts` :
+
+   ```bash
+   sudo nano /etc/hosts
+   ```
+
+   Remplacez la ligne ressemblant à :
+
+   ```text
+   127.0.1.1    ancien-nom
+   ```
+
+   par :
+
+   ```text
+   127.0.1.1    buanderie
+   ```
+
+2. **Activer la résolution mDNS**
+
+   Installez et démarrez *Avahi* pour accéder au nom
+   `buanderie.local` depuis votre réseau :
+
+   ```bash
+   sudo apt install avahi-daemon
+   sudo systemctl enable avahi-daemon
+   sudo systemctl start avahi-daemon
+   ```
+
+3. **Rediriger le port 80 vers 5000**
+
+   Pour éviter de saisir le port dans le navigateur, redirigez le port 80 vers
+   le port 5000 utilisé par Flask :
+
+   ```bash
+   sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 5000
+
+   # Sauvegarder la règle pour qu'elle survive au redémarrage
+   sudo sh -c "iptables-save > /etc/iptables.rules"
+
+   # Recharger automatiquement les règles au démarrage
+   sudo sh -c 'echo -e "#!/bin/sh\niptables-restore < /etc/iptables.rules" > /etc/network/if-pre-up.d/iptables'
+   sudo chmod +x /etc/network/if-pre-up.d/iptables
+   ```
+
+Après ces étapes, l'application est accessible via
+`http://buanderie.local` sans préciser de port.
+
 ## Déploiement sur PythonAnywhere
 
 1. Créez un compte sur [pythonanywhere.com](https://www.pythonanywhere.com/) et ouvrez une console Bash.
