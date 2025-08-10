@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Buanderie
+Exec=/bin/bash -lc '/home/pi/run.sh'
+Icon=utilities-terminal
+Terminal=false
+Path=/home/pi
