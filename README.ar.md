@@ -11,6 +11,7 @@
 - [الإعداد](#الإعداد)
 - [إدارة البيانات](#إدارة-البيانات)
 - [دليل الاستخدام](#دليل-الاستخدام)
+- [النشر على NanoPi Neo (أو ما شابه)](#النشر-على-nanopi-neo-أو-ما-شابه)
 - [النشر على PythonAnywhere](#النشر-على-pythonanywhere)
 - [الاختبارات](#الاختبارات)
 - [المساهمة](#المساهمة)
@@ -83,6 +84,150 @@ python app.py
 ### الإلغاء
 
 اضغط على الحجز في التقويم وأدخل نفس الرمز لتأكيد الحذف.
+
+## النشر على NanoPi Neo (أو ما شابه)
+
+يشرح هذا القسم كيفية تثبيت التطبيق بالكامل على لوحة ARM صغيرة
+(مثل NanoPi Neo أو Raspberry Pi) تعمل بنظام **Debian/Armbian**.
+
+### 1. إعداد اللوحة
+
+- حدّث النظام وثبّت الأدوات الضرورية:
+
+  ```bash
+  sudo apt update
+  sudo apt install -y python3 python3-venv python3-pip git
+  ```
+
+### 2. جلب التطبيق
+
+- استنسخ هذا المستودع ثم ادخل إلى المجلد:
+
+  ```bash
+  git clone https://github.com/votre-utilisateur/buanderie-reservation.git
+  cd buanderie-reservation
+  ```
+
+- *(اختياري)* أنشئ بيئة افتراضية وثبّت الاعتمادات:
+
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install -r requirements.txt
+  ```
+
+### 3. إعداد التطبيق
+
+عرّف متغيرات البيئة التالية (مع تعديل المسارات والقيم حسب حاجتك):
+
+```bash
+export RESERVATIONS_FILE=/home/pi/buanderie-reservation/reservations.json
+export ADMIN_CODE=votre_code_secret
+```
+
+### 4. تشغيل الخادم
+
+- للتجربة السريعة (المنفذ 5000):
+
+  ```bash
+  python app.py
+  ```
+
+- لتوفير خدمة شبكية أكثر ثباتًا (المنفذ 8080):
+
+  ```bash
+  gunicorn app:app --bind 0.0.0.0:8080
+  ```
+
+### 5. جعل الخدمة دائمة *(اختياري)*
+
+حتى يُعاد تشغيل التطبيق تلقائيًا، أنشئ خدمة `systemd`:
+
+```bash
+sudo nano /etc/systemd/system/buanderie.service
+```
+
+أدنى محتوى للملف:
+
+```ini
+[Unit]
+Description=Buanderie Reservation
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/buanderie-reservation
+ExecStart=/usr/bin/python3 /home/pi/buanderie-reservation/app.py
+Environment="RESERVATIONS_FILE=/home/pi/buanderie-reservation/reservations.json"
+Environment="ADMIN_CODE=votre_code_secret"
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+فعّل بعدها الخدمة:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now buanderie.service
+```
+
+سيصبح التطبيق متاحًا على العنوان
+`http://<ip_اللوحة>:5000` (أو على المنفذ المستخدم في `gunicorn`).
+
+### 6. تبسيط الوصول للمستخدمين
+
+للحصول على عنوان أسهل من `http://<ip_اللوحة>:5000` يمكن تعيين اسم مضيف محلي
+وإعادة توجيه الحركة إلى المنفذ 80:
+
+1. **تغيير اسم الجهاز إلى "buanderie"**
+
+   حرر ملف `/etc/hosts`:
+
+   ```bash
+   sudo nano /etc/hosts
+   ```
+
+   استبدل السطر المشابه لـ:
+
+   ```text
+   127.0.1.1    ancien-nom
+   ```
+
+   بـ:
+
+   ```text
+   127.0.1.1    buanderie
+   ```
+
+2. **تفعيل حل mDNS**
+
+   ثبّت وشغّل خدمة *Avahi* للوصول إلى الاسم
+   `buanderie.local` من شبكتك:
+
+   ```bash
+   sudo apt install avahi-daemon
+   sudo systemctl enable avahi-daemon
+   sudo systemctl start avahi-daemon
+   ```
+
+3. **إعادة توجيه المنفذ 80 إلى 5000**
+
+   لتجنب كتابة المنفذ في المتصفح، أعد توجيه المنفذ 80 إلى المنفذ 5000 الذي يستخدمه Flask:
+
+   ```bash
+   sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 5000
+
+   # حفظ القاعدة لتبقى بعد إعادة التشغيل
+   sudo sh -c "iptables-save > /etc/iptables.rules"
+
+   # إعادة تحميل القواعد تلقائيًا عند الإقلاع
+   sudo sh -c 'echo -e "#!/bin/sh\niptables-restore < /etc/iptables.rules" > /etc/network/if-pre-up.d/iptables'
+   sudo chmod +x /etc/network/if-pre-up.d/iptables
+   ```
+
+بعد هذه الخطوات يصبح التطبيق متاحًا عبر
+`http://buanderie.local` بدون الحاجة لتحديد منفذ.
 
 ## النشر على PythonAnywhere
 
